@@ -1,6 +1,6 @@
 [package]
 name = "valu3-derive"
-version = "0.2.1"
+version = "0.1.0"
 edition = "2021"
 license = "MIT OR Apache-2.0"
 readme = "readme.md"
@@ -17,7 +17,7 @@ quote = "1.0.9"
 proc-macro2 = "1.0.56"
 
 [dev-dependencies]
-valu3 = { version="0.2", path = "../valu3" }
+valu3 = { version="0.1", path = "../valu3" }
 
 [lib]
 proc-macro = true
