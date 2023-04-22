@@ -20,7 +20,7 @@ use valu3::prelude::*;
 
 let string_value = "hello".to_value();
 let number_value = 42.to_value();
-let boolean_value = Value::from(true);
+let boolean_value = true.to_value();
 let null_value = Value::Null;
 let undefined_value = Value::Undefined;
 let mut datetime_value = DateTime::from("2023-04-05T00:00:00Z").to_value();
@@ -31,20 +31,6 @@ assert_eq!(boolean_value, true);
 assert_eq!(null_value, Value::Null);
 assert_eq!(undefined_value, Value::Undefined);
 datetime_value.add_days(1);
-```
-
-## Converting to Value
-You can also convert your own data types to a `Value` enum by implementing the `to_value` method. For example:
-
-```rust,editable
-use valu3::prelude::*;
-
-let array = Array::from(vec![Value::Number(Number::from(1)), Value::Number(Number::from(2))]).to_value();
-let object = Object::from(vec![("key".to_string(), Value::String(StringB::new("value".to_string())))]).to_value();
-let string = StringB::new("hello".to_string()).to_value();
-let number = Number::from(42).to_value();
-let boolean = true.to_value();
-let datetime = DateTime::from("2023-04-05T00:00:00Z").to_value();
 ```
 
 ## Getting Started
