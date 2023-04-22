@@ -1,6 +1,8 @@
 use crate::prelude::*;
 use std::collections::{BTreeMap, HashMap};
 
+pub trait PrimitiveType {}
+
 /// A trait for converting types to `Value`.
 pub trait ToValueBehavior {
     /// Converts a type into a `Value`.

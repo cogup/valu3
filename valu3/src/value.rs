@@ -61,7 +61,7 @@ impl From<()> for Value {
 
 impl<T> From<T> for Value
 where
-    T: ToValueBehavior,
+    T: ToValueBehavior + PrimitiveType,
 {
     fn from(value: T) -> Self {
         value.to_value()

@@ -2,6 +2,12 @@ use std::collections::{BTreeMap, HashMap};
 
 use crate::prelude::*;
 
+impl ToValueBehavior for Value {
+    fn to_value(&self) -> Value {
+        self.clone()
+    }
+}
+
 #[cfg(feature = "cstring")]
 impl ToValueBehavior for CString {
     fn to_value(&self) -> Value {
@@ -35,8 +41,8 @@ impl ToValueBehavior for &str {
 }
 
 impl ToValueBehavior for StringB {
-    fn to_value(&self) -> crate::value::Value {
-        crate::value::Value::String(StringB::from(self.clone()))
+    fn to_value(&self) -> Value {
+        Value::String(StringB::from(self.clone()))
     }
 }
 
@@ -115,30 +121,6 @@ where
     }
 }
 
-impl ToValueBehavior for Vec<Value> {
-    fn to_value(&self) -> Value {
-        Array::from(self.clone()).to_value()
-    }
-}
-
-impl<T> ToValueBehavior for HashMap<T, Value>
-where
-    T: ValueKeyBehavior,
-{
-    fn to_value(&self) -> Value {
-        Object::from(self.clone()).to_value()
-    }
-}
-
-impl<T> ToValueBehavior for BTreeMap<T, Value>
-where
-    T: ValueKeyBehavior,
-{
-    fn to_value(&self) -> Value {
-        Object::from(self.clone()).to_value()
-    }
-}
-
 // Numerics
 impl ToValueBehavior for u8 {
     fn to_value(&self) -> Value {
@@ -197,5 +179,41 @@ impl ToValueBehavior for f32 {
 impl ToValueBehavior for f64 {
     fn to_value(&self) -> Value {
         Value::Number(Number::from(*self))
+    }
+}
+
+#[cfg(test)]
+mod test {
+    use std::collections::HashMap;
+
+    use crate::prelude::*;
+
+    #[test]
+    fn test_boolean() {
+        assert_eq!(true.to_value(), Value::Boolean(true));
+        assert_eq!(false.to_value(), Value::Boolean(false));
+    }
+
+    #[test]
+    fn test_string() {
+        assert_eq!(
+            "test".to_value(),
+            Value::String(StringB::new("test".to_string()))
+        );
+    }
+
+    #[test]
+    fn test_array() {
+        assert_eq!(
+            vec![1, 2, 3].to_value(),
+            Value::Array(Array::from(vec![1, 2, 3]))
+        );
+    }
+
+    #[test]
+    fn test_object() {
+        let mut map = HashMap::new();
+        map.insert("test", 1);
+        assert_eq!(map.to_value(), Object::from(map.clone()).to_value());
     }
 }
