@@ -55,4 +55,4 @@ If you find a bug or have a suggestion for a new feature, please open an issue o
 If you would like to contribute to the project, please feel free to submit a pull request. Before submitting a pull request, please make sure that your code adheres to the project's style guidelines and passes all tests.
 
 ## License
-This project is licensed under the MIT License. See the [LICENSE-APACHE](https://github.com/purp-lang/valu3/blob/main/LICENSE-APACHE) or [LICENSE-MIT](https://github.com/purp-lang/valu3/blob/main/LICENSE-MIT) file for more information.
+This project is licensed under the Apache 2.0 or MIT License. See the [LICENSE-APACHE](https://github.com/purp-lang/valu3/blob/main/LICENSE-APACHE) or [LICENSE-MIT](https://github.com/purp-lang/valu3/blob/main/LICENSE-MIT) file for more information.
