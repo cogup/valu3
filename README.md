@@ -2,6 +2,15 @@
 
 The Valu3 provides a flexible and powerful way to manipulate different types of data in your Rust projects. Whether you need to work with numbers, strings, arrays, objects, or datetime values, the Valu3 has you covered.
 
+[![crates.io](https://img.shields.io/crates/v/valu3?label=0.1.6)](https://crates.io/crates/valu3)
+[![Documentation](https://docs.rs/valu3/badge.svg?version=0.1.6)](https://docs.rs/valu3/0.1.6)
+![MSRV](https://img.shields.io/badge/rustc-1.59+-ab6000.svg)
+![MIT or Apache 2.0 licensed](https://img.shields.io/crates/l/actix-web.svg)
+[![Dependency Status](https://deps.rs/crate/valu3/0.1.6/status.svg)](https://deps.rs/crate/valu3/0.1.6)
+![Main test](https://github.com/purp-lang/valu3/actions/workflows/main-test.yml/badge.svg)
+[![codecov](https://codecov.io/gh/purp-lang/valu3/branch/master/graph/badge.svg)](https://codecov.io/gh/purp-lang/valu3)
+![downloads](https://img.shields.io/crates/d/valu3.svg)
+
 ## Features :carousel_horse:
 
 - Easy-to-use API for manipulating values
