@@ -1,0 +1,5 @@
+[workspace]
+members = [
+    "valu3",
+    "valu3_derive",
+]

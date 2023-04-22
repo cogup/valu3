@@ -1,0 +1,27 @@
+[package]
+name = "valu3-derive"
+version = "0.2.1"
+edition = "2021"
+license = "MIT OR Apache-2.0"
+readme = "readme.md"
+auhtors = ["Philippe Assis <codephilippe@gmail.com>"]
+repository = "https://github.com/14bislab/valu3"
+keywords = ["valu3", "serialization", "deserialization", "serde"]
+documentation = "https://docs.rs/valu3"
+description = "A generic serialization/deserialization/type framework"
+categories = ["encoding", "no-std"]
+
+[dependencies]
+syn = { version = "2.0.13", features = ["full"] }
+quote = "1.0.9"
+proc-macro2 = "1.0.56"
+
+[dev-dependencies]
+valu3 = { version="0.2", path = "../valu3" }
+
+[lib]
+proc-macro = true
+
+[[example]]
+name = "derive"
+required-features = []
