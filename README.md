@@ -16,7 +16,7 @@ The Valu3 provides a flexible and powerful way to manipulate different types of 
 Here are some examples of how to use the Valu3:
 
 ```rust,editable
-use value::prelude::*;
+use valu3::prelude::*;
 
 let string_value = "hello".to_value();
 let number_value = 42.to_value();
@@ -37,7 +37,7 @@ datetime_value.add_days(1);
 You can also convert your own data types to a `Value` enum by implementing the `to_value` method. For example:
 
 ```rust,editable
-use value::prelude::*;
+use valu3::prelude::*;
 
 let array = Array::from(vec![Value::Number(Number::from(1)), Value::Number(Number::from(2))]).to_value();
 let object = Object::from(vec![("key".to_string(), Value::String(StringB::new("value".to_string())))]).to_value();

@@ -8,7 +8,7 @@
 //! # Examples
 //!
 //! ```
-//! use crate::{Array, DateTime, Number, Object, StringB, Value};
+//! use valu3::prelude::*;
 //!
 //! let string_value = hello".to_value();
 //! let number_value = 42.to_value();
@@ -28,7 +28,7 @@
 //! # To Value
 //! It is also possible to convert a data type to a value. To do so, just implement the `to_value` method for the desired data type. The `to_value` method must return a `Value` enum.
 //! ```
-//! use crate::{Array, DateTime, Number, Object, StringB, Value};
+//! use valu3::prelude::*;
 //!
 //! let array = Array::from(vec![Value::Number(Number::from(1)), Value::Number(Number::from(2))]).to_value();
 //! let object = Object::from(vec![("key", "value")]).to_value();
