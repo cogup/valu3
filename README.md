@@ -51,12 +51,12 @@ let datetime = DateTime::from("2023-04-05T00:00:00Z").to_value();
 To start using the Valu3 in your Rust project, simply add the following line to your `Cargo.toml` file:
 ```toml
 [dependencies]
-value = "0.1"
+valu3 = "0.1"
 ```
 
 Then, you can import the library in your code like this:
 ```rust
-use value::Value;
+use valu3::Value;
 ```
 
 ## Contributing
