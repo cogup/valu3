@@ -24,19 +24,6 @@
 //! assert!(undefined_value, Value::Undefined);
 //! datetime_value.add_days(1);
 //! ```
-//!
-//! # To Value
-//! It is also possible to convert a data type to a value. To do so, just implement the `to_value` method for the desired data type. The `to_value` method must return a `Value` enum.
-//! ```
-//! use valu3::prelude::*;
-//!
-//! let array = Array::from(vec![Value::Number(Number::from(1)), Value::Number(Number::from(2))]).to_value();
-//! let object = Object::from(vec![("key", "value")]).to_value();
-//! let string = StringB::from("hello").to_value();
-//! let number = Number::from(42).to_value();
-//! let boolean = true.to_value();
-//! let datetime = DateTime::from("2023-04-05T00:00:00Z").to_value();
-//! ```
 pub mod primitives;
 pub mod prelude;
 pub mod traits;
