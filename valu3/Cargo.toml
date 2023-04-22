@@ -1,6 +1,6 @@
 [package]
 name = "valu3"
-version = "0.1.3"
+version = "0.1.4"
 edition = "2021"
 license = "MIT OR Apache-2.0"
 readme = "crates-io.md"
@@ -9,6 +9,8 @@ repository = "https://github.com/purp-lang/valu3"
 keywords = ["value", "generic", "type", "serde", "any"]
 description = "A generic serialization/deserialization/type framework"
 categories = ["encoding", "no-std"]
+documentation = "https://docs.rs/valu3"
+
 
 [dependencies]
 pest="2.5.7"
