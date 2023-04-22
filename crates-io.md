@@ -2,8 +2,10 @@
 
 The Valu3 provides a flexible and powerful way to manipulate different types of data in your Rust projects. Whether you need to work with numbers, strings, arrays, objects, or datetime values, the Valu3 has you covered.
 
-## Features
+## Docs and Notices
+Use our github to stay up to date [Valu3](https://github.com/purp-lang/valu3)
 
+## Features
 - Easy-to-use API for manipulating values
 - Consistent API for different types of data
 - Provides classic methods for numerical, string, object, array and datetime manipulation
@@ -60,9 +62,9 @@ use value::Value;
 ```
 
 ## Contributing
-If you find a bug or have a suggestion for a new feature, please open an issue on the [GitHub repository](https://github.com/14bislab/valu3/issues).
+If you find a bug or have a suggestion for a new feature, please open an issue on the [GitHub repository](https://github.com/purp-lang/valu3/issues).
 
 If you would like to contribute to the project, please feel free to submit a pull request. Before submitting a pull request, please make sure that your code adheres to the project's style guidelines and passes all tests.
 
 ## License
-This project is licensed under the MIT License. See the [LICENSE-APACHE](https://github.com/14bislab/valu3/blob/main/LICENSE-APACHE) or [LICENSE-MIT](https://github.com/14bislab/valu3/blob/main/LICENSE-MIT) file for more information.
+This project is licensed under the MIT License. See the [LICENSE-APACHE](https://github.com/purp-lang/valu3/blob/main/LICENSE-APACHE) or [LICENSE-MIT](https://github.com/purp-lang/valu3/blob/main/LICENSE-MIT) file for more information.
