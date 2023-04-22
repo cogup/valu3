@@ -21,7 +21,7 @@ impl Value {
     /// ```no_run
     /// use json_utils::{Value, JsonMode};
     ///
-    /// let value = Value::str_to_value("{\"name\":\"John Doe\",\"age\":30,\"is_active\":true}").unwrap();
+    /// let value = Value::payload_to_value("{\"name\":\"John Doe\",\"age\":30,\"is_active\":true}").unwrap();
     /// let json_string = value.to_json(JsonMode::Indented);
     /// println!("{}", json_string);
     /// ```

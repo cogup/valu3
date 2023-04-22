@@ -30,6 +30,8 @@ impl<K, V> PrimitiveType for BTreeMap<K, V> {}
 
 impl<V> PrimitiveType for Vec<V> {}
 
+impl<V> PrimitiveType for Option<V> {}
+
 // Numerics
 impl PrimitiveType for u8 {}
 

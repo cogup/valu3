@@ -123,7 +123,6 @@ impl ObjectBehavior for Object {
     }
 }
 
-
 impl Default for Object {
     /// Creates a new `Object` with an empty `HashMap`.
     fn default() -> Self {
@@ -131,39 +130,34 @@ impl Default for Object {
     }
 }
 
-impl<T> From<BTreeMap<T, Value>> for Object
+impl<T, V> From<BTreeMap<T, V>> for Object
 where
     T: ValueKeyBehavior,
+    V: ToValueBehavior,
 {
     /// Converts BTreeMap<ValueKey, Value> into Object.
-    fn from(value: BTreeMap<T, Value>) -> Self {
+    fn from(value: BTreeMap<T, V>) -> Self {
         Object::BTreeMap(
             value
                 .iter()
-                .map(|(k, v)| (k.to_value_key(), v.clone()))
+                .map(|(k, v)| (k.to_value_key(), v.to_value()))
                 .collect::<BTreeMap<ValueKey, Value>>(),
         )
     }
 }
 
-impl From<BTreeMap<ValueKey, Value>> for Object {
-    /// Converts HashMap<ValueKey, Value> into Object.
-    fn from(value: BTreeMap<ValueKey, Value>) -> Self {
-        Object::BTreeMap(value)
-    }
-}
-
-impl<T> From<HashMap<T, Value>> for Object
+impl<T, V> From<HashMap<T, V>> for Object
 where
     T: ValueKeyBehavior,
+    V: ToValueBehavior,
 {
     /// Converts BTreeMap<ValueKey, Value> into Object.
-    fn from(value: HashMap<T, Value>) -> Self {
-        Object::BTreeMap(
+    fn from(value: HashMap<T, V>) -> Self {
+        Object::HashMap(
             value
                 .iter()
-                .map(|(k, v)| (k.to_value_key(), v.clone()))
-                .collect::<BTreeMap<ValueKey, Value>>(),
+                .map(|(k, v)| (k.to_value_key(), v.to_value()))
+                .collect::<HashMap<ValueKey, Value>>(),
         )
     }
 }
@@ -182,16 +176,17 @@ impl From<Vec<(ValueKey, Value)>> for Object {
     }
 }
 
-impl<T> From<Vec<(T, Value)>> for Object
+impl<T, V> From<Vec<(T, V)>> for Object
 where
     T: ValueKeyBehavior,
+    V: ToValueBehavior,
 {
     /// Converts a vector of key-value pairs into an Object.
-    fn from(value: Vec<(T, Value)>) -> Self {
+    fn from(value: Vec<(T, V)>) -> Self {
         Object::HashMap(
             value
                 .into_iter()
-                .map(|(k, v)| (k.to_value_key(), v.clone()))
+                .map(|(k, v)| (k.to_value_key(), v.to_value()))
                 .collect(),
         )
     }

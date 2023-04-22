@@ -9,16 +9,7 @@ struct JSONParser;
 use pest::iterators::Pair;
 
 impl Value {
-    /// Parses a string to a `Value`.
-    ///
-    /// # Arguments
-    ///
-    /// * `str` - A string slice to parse.
-    ///
-    /// # Errors
-    ///
-    /// Returns an `Error` if the string is not parseable.
-    pub fn str_to_value(str: &str) -> Result<Value, Error> {
+    pub fn payload_to_value(str: &str) -> Result<Value, Error> {
         let value = match JSONParser::parse(Rule::json, str) {
             Ok(mut pairs) => match pairs.next() {
                 Some(pair) => Self::parse_value(pair),
@@ -80,18 +71,18 @@ mod tests {
         \"test3\": [0, 1]
        }";
 
-        let compare = Value::Object({
+        let compare = Value::from({
             let mut map = HashMap::new();
-            map.insert("test".to_string(), Value::Boolean(true));
-            map.insert("test2".to_string(), Value::String(StringB::from("ok")));
+            map.insert("test".to_string(), true.to_value());
+            map.insert("test2".to_string(), "ok".to_value());
             map.insert(
                 "test3".to_string(),
-                Value::from(vec![Value::from(0), Value::from(1)]),
+                Value::from(vec![0, 1]),
             );
-            Object::from(map)
+            map
         });
 
-        assert_eq!(Value::str_to_value(raw), Ok(compare));
+        assert_eq!(Value::payload_to_value(raw), Ok(compare));
     }
 
     #[test]
@@ -107,7 +98,7 @@ mod tests {
             Value::from(list)
         };
 
-        assert_eq!(Value::str_to_value(raw), Ok(compare));
+        assert_eq!(Value::payload_to_value(raw), Ok(compare));
     }
 
     #[test]
@@ -115,9 +106,9 @@ mod tests {
         let int = "0";
         let float = "1.0";
 
-        assert_eq!(Value::str_to_value(int), Ok(Value::Number(Number::from(0))));
+        assert_eq!(Value::payload_to_value(int), Ok(Value::Number(Number::from(0))));
         assert_eq!(
-            Value::str_to_value(float),
+            Value::payload_to_value(float),
             Ok(Value::Number(Number::from(1.0)))
         );
     }
@@ -127,7 +118,7 @@ mod tests {
         let string = r#""string""#;
 
         assert_eq!(
-            Value::str_to_value(string),
+            Value::payload_to_value(string),
             Ok(Value::String(StringB::from("string")))
         );
     }
@@ -136,12 +127,12 @@ mod tests {
     fn null() {
         let null = "null";
 
-        assert_eq!(Value::str_to_value(null), Ok(Value::Null));
+        assert_eq!(Value::payload_to_value(null), Ok(Value::Null));
     }
     #[test]
     fn boolean() {
         let boolean = "true";
 
-        assert_eq!(Value::str_to_value(boolean), Ok(Value::Boolean(true)));
+        assert_eq!(Value::payload_to_value(boolean), Ok(Value::Boolean(true)));
     }
 }

@@ -115,7 +115,7 @@ where
         Object::from(
             self.iter()
                 .map(|(k, v)| (k.to_value_key(), v.to_value()))
-                .collect::<BTreeMap<ValueKey, Value>>(),
+                .collect::<HashMap<ValueKey, Value>>(),
         )
         .to_value()
     }
@@ -214,6 +214,6 @@ mod test {
     fn test_object() {
         let mut map = HashMap::new();
         map.insert("test", 1);
-        assert_eq!(map.to_value(), Object::from(map.clone()).to_value());
+        assert_eq!(map.to_value(), Object::from(map).to_value());
     }
 }
