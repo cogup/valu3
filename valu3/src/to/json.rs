@@ -112,3 +112,40 @@ impl Value {
         }
     }
 }
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn it_should_remove_tabs_and_empty_lines() {
+        let str =
+            String::from("{\n\t\"name\":\"John Doe\",\n\t\"age\":30,\n\t\"is_active\":true\n}");
+        let expected = String::from("{\"name\":\"John Doe\",\"age\":30,\"is_active\":true}");
+        assert_eq!(expected, Value::inline(Value::inline(str)));
+    }
+
+    #[test]
+    fn it_should_add_tabs_by_number() {
+        assert_eq!("\t\t\t", Value::tabs(3));
+    }
+
+    #[test]
+    fn it_should_convert_a_value_to_json_string() {
+        let value_str = Value::payload_to_value("{\"name\":\"John Doe\"}").unwrap();
+        let value_number = Value::payload_to_value("{\"age\":30}").unwrap();
+        let value_boolean = Value::payload_to_value("{\"is_active\":true}").unwrap();
+        assert_eq!(
+            "{\n\t\"name\": \"John Doe\"\n}",
+            Value::to_json_inner(&value_str, 0)
+        );
+        assert_eq!(
+            "{\n\t\"age\": 30\n}",
+            Value::to_json_inner(&value_number, 0)
+        );
+        assert_eq!(
+            "{\n\t\"is_active\": true\n}",
+            Value::to_json_inner(&value_boolean, 0)
+        )
+    }
+}
