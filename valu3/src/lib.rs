@@ -10,14 +10,14 @@
 //! ```
 //! use crate::{Array, DateTime, Number, Object, StringB, Value};
 //!
-//! let string_value = Value::String(StringB::new("hello".to_string()));
-//! let number_value = Value::Number(Number::from(42));
-//! let boolean_value = Value::Boolean(true);
+//! let string_value = hello".to_value();
+//! let number_value = 42.to_value();
+//! let boolean_value = true.to_value();
 //! let null_value = Value::Null;
 //! let undefined_value = Value::Undefined;
-//! let mut datetime_value = Value::DateTime(DateTime::from("2023-04-05T00:00:00Z"));
+//! let mut datetime_value = DateTime::from("2023-04-05T00:00:00Z").to_value();
 //!
-//! string_value.to_string();
+//! string_value.as_string();
 //! number_value.get_i32();
 //! assert!(boolean_value, true);
 //! assert!(null_value, Value::Null);
@@ -31,8 +31,8 @@
 //! use crate::{Array, DateTime, Number, Object, StringB, Value};
 //!
 //! let array = Array::from(vec![Value::Number(Number::from(1)), Value::Number(Number::from(2))]).to_value();
-//! let object = Object::from(vec![("key".to_string(), Value::String(StringB::new("value".to_string())))]).to_value();
-//! let string = StringB::new("hello".to_string()).to_value();
+//! let object = Object::from(vec![("key", "value")]).to_value();
+//! let string = StringB::from("hello").to_value();
 //! let number = Number::from(42).to_value();
 //! let boolean = true.to_value();
 //! let datetime = DateTime::from("2023-04-05T00:00:00Z").to_value();
