@@ -61,7 +61,8 @@ impl Value {
 
 #[cfg(test)]
 mod tests {
-    use super::*;
+    use crate::prelude::*;
+    use std::collections::HashMap;
 
     #[test]
     fn json() {
@@ -75,10 +76,7 @@ mod tests {
             let mut map = HashMap::new();
             map.insert("test".to_string(), true.to_value());
             map.insert("test2".to_string(), "ok".to_value());
-            map.insert(
-                "test3".to_string(),
-                Value::from(vec![0, 1]),
-            );
+            map.insert("test3".to_string(), Value::from(vec![0, 1]));
             map
         });
 
@@ -106,7 +104,10 @@ mod tests {
         let int = "0";
         let float = "1.0";
 
-        assert_eq!(Value::payload_to_value(int), Ok(Value::Number(Number::from(0))));
+        assert_eq!(
+            Value::payload_to_value(int),
+            Ok(Value::Number(Number::from(0)))
+        );
         assert_eq!(
             Value::payload_to_value(float),
             Ok(Value::Number(Number::from(1.0)))
@@ -134,5 +135,22 @@ mod tests {
         let boolean = "true";
 
         assert_eq!(Value::payload_to_value(boolean), Ok(Value::Boolean(true)));
+    }
+
+    #[test]
+    fn all() {
+        let boolean = Value::payload_to_value("true").unwrap();
+        let float = Value::payload_to_value("3.14").unwrap();
+        let json = Value::payload_to_value(r#"{"item": 3.14}"#).unwrap();
+        let array = Value::payload_to_value(r#"[1,2,3]"#).unwrap();
+        let null = Value::payload_to_value("null").unwrap();
+        let string = Value::payload_to_value(r#""123""#).unwrap();
+
+        assert_eq!(boolean, true.to_value());
+        assert_eq!(float, 3.14.to_value());
+        assert_eq!(json, Value::from(vec![("item", 3.14)]));
+        assert_eq!(array, vec![1, 2, 3].to_value());
+        assert_eq!(null, Value::Null);
+        assert_eq!(string, "123".to_value());
     }
 }

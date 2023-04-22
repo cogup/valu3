@@ -68,6 +68,33 @@ where
     }
 }
 
+impl<K, V> From<Vec<(K, V)>> for Value
+where
+    K: ValueKeyBehavior,
+    V: ToValueBehavior + PrimitiveType,
+{
+    fn from(value: Vec<(K, V)>) -> Self {
+        let mut object = Object::default();
+        for (key, value) in value {
+            object.insert(key, value.to_value());
+        }
+        Value::Object(object)
+    }
+}
+
+impl<K> From<Vec<(K, Value)>> for Value
+where
+    K: ValueKeyBehavior,
+{
+    fn from(value: Vec<(K, Value)>) -> Self {
+        let mut object = Object::default();
+        for (key, value) in value {
+            object.insert(key, value);
+        }
+        Value::Object(object)
+    }
+}
+
 #[cfg(test)]
 mod tests {
     use crate::prelude::*;
