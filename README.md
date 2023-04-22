@@ -56,7 +56,11 @@ valu3 = "0.1"
 
 Then, you can import the library in your code like this:
 ```rust
-use valu3::Value;
+use valu3::prelude::*;
+
+//...
+
+let pi = Value::from(3.14);
 ```
 
 ## Contributing
