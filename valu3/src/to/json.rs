@@ -122,7 +122,7 @@ mod tests {
         let str =
             String::from("{\n\t\"name\":\"John Doe\",\n\t\"age\":30,\n\t\"is_active\":true\n}");
         let expected = String::from("{\"name\":\"John Doe\",\"age\":30,\"is_active\":true}");
-        assert_eq!(expected, Value::inline(Value::inline(str)));
+        assert_eq!(expected, Value::inline(str));
     }
 
     #[test]
