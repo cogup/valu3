@@ -5,8 +5,8 @@ edition = "2021"
 license = "MIT OR Apache-2.0"
 readme = "crates-io.md"
 authors = ["Philippe Assis <codephilippe@gmail.com>"]
-repository = "https://github.com/14bislab/valu3"
-keywords = ["value", "generic", "type", "serde"]
+repository = "https://github.com/purp-lang/valu3"
+keywords = ["value", "generic", "type", "serde", "any"]
 description = "A generic serialization/deserialization/type framework"
 categories = ["encoding", "no-std"]
 
