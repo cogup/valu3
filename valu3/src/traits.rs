@@ -217,28 +217,6 @@ where
     }
 }
 
-#[cfg(not(feature = "cstring"))]
-impl<T> FromValueBehavior for HashMap<String, T>
-where
-    T: FromValueBehavior,
-{
-    type Item = HashMap<String, <T as FromValueBehavior>::Item>;
-
-    fn from_value(value: Value) -> Option<Self::Item> {
-        if let Value::Object(array) = value {
-            Some(array.iter().fold(HashMap::new(), |mut map, (key, value)| {
-                map.insert(
-                    key.as_string_b().as_string(),
-                    T::from_value(value.clone()).unwrap(),
-                );
-                map
-            }))
-        } else {
-            None
-        }
-    }
-}
-
 #[cfg(feature = "cstring")]
 impl<T> FromValueBehavior for HashMap<CString, T>
 where
@@ -284,6 +262,28 @@ where
 }
 
 #[cfg(feature = "cstring")]
+impl<T> FromValueBehavior for HashMap<String, T>
+where
+    T: FromValueBehavior,
+{
+    type Item = HashMap<String, <T as FromValueBehavior>::Item>;
+
+    fn from_value(value: Value) -> Option<Self::Item> {
+        if let Value::Object(array) = value {
+            Some(array.iter().fold(HashMap::new(), |mut map, (key, value)| {
+                map.insert(
+                    key.as_string_b().as_string(),
+                    T::from_value(value.clone()).unwrap(),
+                );
+                map
+            }))
+        } else {
+            None
+        }
+    }
+}
+
+#[cfg(feature = "cstring")]
 impl<T> FromValueBehavior for BTreeMap<String, T>
 where
     T: FromValueBehavior,
@@ -305,7 +305,7 @@ where
     }
 }
 
-#[cfg(feature = "cstring")]
+#[cfg(not(feature = "cstring"))]
 impl<T> FromValueBehavior for HashMap<String, T>
 where
     T: FromValueBehavior,
