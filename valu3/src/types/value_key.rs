@@ -1,27 +1,24 @@
-#[cfg(feature = "cstring")]
-use std::ffi::CString;
+use crate::prelude::*;
+
 pub trait ValueTrait {}
 
 #[derive(Debug, Clone, PartialEq, Eq, Hash, PartialOrd, Ord)]
 pub enum ValueKey {
-    #[cfg(feature = "cstring")]
-    String(CString),
-    #[cfg(not(feature = "cstring"))]
-    String(String),
+    String(StringB),
     Number(usize),
 }
 
 impl ValueKey {
-    pub fn to_string(&self) -> String {
+    pub fn as_string_b(&self) -> StringB {
         match self {
             ValueKey::String(s) => s.clone(),
-            ValueKey::Number(n) => n.to_string(),
+            ValueKey::Number(n) => StringB::from(n.to_string()),
         }
     }
 
     pub fn to_usize(&self) -> usize {
         match self {
-            ValueKey::String(s) => s.parse().unwrap(),
+            ValueKey::String(s) => panic!("Cannot convert string to usize: {}", s),
             ValueKey::Number(n) => *n,
         }
     }
@@ -38,13 +35,13 @@ impl Display for ValueKey {
 
 impl From<String> for ValueKey {
     fn from(s: String) -> Self {
-        ValueKey::String(s)
+        ValueKey::String(StringB::from(s))
     }
 }
 
 impl From<&str> for ValueKey {
     fn from(s: &str) -> Self {
-        ValueKey::String(s.to_string())
+        ValueKey::String(StringB::from(s))
     }
 }
 
@@ -65,7 +62,7 @@ impl<'a> FromIterator<&'a ValueKey> for ValueKey {
         match iterator.next() {
             Some(ValueKey::String(s)) => ValueKey::String(s.clone()),
             Some(ValueKey::Number(n)) => ValueKey::Number(*n),
-            None => ValueKey::String(String::new()),
+            None => ValueKey::String(StringB::default()),
         }
     }
 }

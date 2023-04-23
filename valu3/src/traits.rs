@@ -159,6 +159,20 @@ impl FromValueBehavior for f64 {
     }
 }
 
+#[cfg(feature = "cstring")]
+impl FromValueBehavior for String {
+    type Item = String;
+
+    fn from_value(value: Value) -> Option<Self::Item> {
+        if let Value::String(string_b) = value {
+            Some(string_b.as_string())
+        } else {
+            None
+        }
+    }
+}
+
+#[cfg(not(feature = "cstring"))]
 impl FromValueBehavior for String {
     type Item = String;
 
@@ -203,6 +217,51 @@ where
     }
 }
 
+#[cfg(feature = "cstring")]
+impl<T> FromValueBehavior for HashMap<CString, T>
+where
+    T: FromValueBehavior,
+{
+    type Item = HashMap<CString, <T as FromValueBehavior>::Item>;
+
+    fn from_value(value: Value) -> Option<Self::Item> {
+        if let Value::Object(array) = value {
+            Some(array.iter().fold(HashMap::new(), |mut map, (key, value)| {
+                map.insert(
+                    key.as_string_b().extract(),
+                    T::from_value(value.clone()).unwrap(),
+                );
+                map
+            }))
+        } else {
+            None
+        }
+    }
+}
+
+#[cfg(feature = "cstring")]
+impl<T> FromValueBehavior for BTreeMap<CString, T>
+where
+    T: FromValueBehavior,
+{
+    type Item = BTreeMap<CString, <T as FromValueBehavior>::Item>;
+
+    fn from_value(value: Value) -> Option<Self::Item> {
+        if let Value::Object(array) = value {
+            Some(array.iter().fold(BTreeMap::new(), |mut map, (key, value)| {
+                map.insert(
+                    key.as_string_b().extract(),
+                    T::from_value(value.clone()).unwrap(),
+                );
+                map
+            }))
+        } else {
+            None
+        }
+    }
+}
+
+#[cfg(feature = "cstring")]
 impl<T> FromValueBehavior for HashMap<String, T>
 where
     T: FromValueBehavior,
@@ -212,7 +271,10 @@ where
     fn from_value(value: Value) -> Option<Self::Item> {
         if let Value::Object(array) = value {
             Some(array.iter().fold(HashMap::new(), |mut map, (key, value)| {
-                map.insert(key.to_string(), T::from_value(value.clone()).unwrap());
+                map.insert(
+                    key.as_string_b().as_string(),
+                    T::from_value(value.clone()).unwrap(),
+                );
                 map
             }))
         } else {
@@ -221,6 +283,51 @@ where
     }
 }
 
+#[cfg(feature = "cstring")]
+impl<T> FromValueBehavior for BTreeMap<String, T>
+where
+    T: FromValueBehavior,
+{
+    type Item = BTreeMap<String, <T as FromValueBehavior>::Item>;
+
+    fn from_value(value: Value) -> Option<Self::Item> {
+        if let Value::Object(array) = value {
+            Some(array.iter().fold(BTreeMap::new(), |mut map, (key, value)| {
+                map.insert(
+                    key.as_string_b().as_string(),
+                    T::from_value(value.clone()).unwrap(),
+                );
+                map
+            }))
+        } else {
+            None
+        }
+    }
+}
+
+#[cfg(not(feature = "cstring"))]
+impl<T> FromValueBehavior for HashMap<String, T>
+where
+    T: FromValueBehavior,
+{
+    type Item = HashMap<String, <T as FromValueBehavior>::Item>;
+
+    fn from_value(value: Value) -> Option<Self::Item> {
+        if let Value::Object(array) = value {
+            Some(array.iter().fold(HashMap::new(), |mut map, (key, value)| {
+                map.insert(
+                    key.as_string_b().as_string(),
+                    T::from_value(value.clone()).unwrap(),
+                );
+                map
+            }))
+        } else {
+            None
+        }
+    }
+}
+
+#[cfg(not(feature = "cstring"))]
 impl<T> FromValueBehavior for BTreeMap<String, T>
 where
     T: FromValueBehavior,
@@ -285,7 +392,7 @@ pub trait ValueKeyBehavior: Clone {
 
 impl ValueKeyBehavior for String {
     fn to_value_key(&self) -> ValueKey {
-        ValueKey::String(self.clone())
+        ValueKey::String(StringB::from(self.clone()))
     }
 }
 impl ValueKeyBehavior for usize {
@@ -303,6 +410,6 @@ impl ValueKeyBehavior for usize {
 }
 impl ValueKeyBehavior for &str {
     fn to_value_key(&self) -> ValueKey {
-        ValueKey::String(self.to_string())
+        ValueKey::String(StringB::from(self.clone()))
     }
 }

@@ -7,7 +7,7 @@
 //! ```
 //! use crate::{Array, DateTime, Number, Object, StringB, Value};
 //!
-//! let string_value = Value::String(StringB::new("hello".to_string()));
+//! let string_value = Value::String(StringB::from("hello".to_string()));
 //! let number_value = Value::Number(Number::from(42));
 //! let boolean_value = Value::Boolean(true);
 //! let null_value = Value::Null;
@@ -53,48 +53,6 @@ impl Display for Value {
     }
 }
 
-impl From<()> for Value {
-    fn from(_: ()) -> Self {
-        Value::Null
-    }
-}
-
-impl<T> From<T> for Value
-where
-    T: ToValueBehavior + PrimitiveType,
-{
-    fn from(value: T) -> Self {
-        value.to_value()
-    }
-}
-
-impl<K, V> From<Vec<(K, V)>> for Value
-where
-    K: ValueKeyBehavior,
-    V: ToValueBehavior + PrimitiveType,
-{
-    fn from(value: Vec<(K, V)>) -> Self {
-        let mut object = Object::default();
-        for (key, value) in value {
-            object.insert(key, value.to_value());
-        }
-        Value::Object(object)
-    }
-}
-
-impl<K> From<Vec<(K, Value)>> for Value
-where
-    K: ValueKeyBehavior,
-{
-    fn from(value: Vec<(K, Value)>) -> Self {
-        let mut object = Object::default();
-        for (key, value) in value {
-            object.insert(key, value);
-        }
-        Value::Object(object)
-    }
-}
-
 #[cfg(test)]
 mod tests {
     use crate::prelude::*;
@@ -102,7 +60,7 @@ mod tests {
     // Tests for the different data types and their conversion to a `Value` enum.
     #[test]
     fn test_value_string() {
-        let string = StringB::new("hello".to_string());
+        let string = StringB::from("hello".to_string());
         let value = Value::String(string.clone());
         assert_eq!(value, Value::String(string));
     }
@@ -134,7 +92,7 @@ mod tests {
         let mut object = Object::default();
         object.insert(
             "key".to_string(),
-            Value::String(StringB::new("value".to_string())),
+            Value::String(StringB::from("value".to_string())),
         );
         let value = Value::Object(object.clone());
         assert_eq!(value, Value::Object(object));

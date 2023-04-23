@@ -275,7 +275,7 @@ mod tests {
     fn array_from_btree_map() {
         let mut map = BTreeMap::new();
         map.insert("key1", Value::from(42));
-        map.insert("key2", Value::from("hello".to_string()));
+        map.insert("key2", Value::from("hello"));
 
         let array = Array::from(map);
 

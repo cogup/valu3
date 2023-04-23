@@ -3,8 +3,7 @@
 //! This implementation offers a way to handle strings with additional features, such as converting
 //! the string to uppercase or lowercase, trimming, replacing, and concatenating. It also handles
 //! converting between different representations of strings, such as `CString`, `String`, and `Vec<u8>`.
-#[cfg(feature = "cstring")]
-use std::ffi::CString;
+use crate::prelude::*;
 use std::fmt::{Display, Formatter};
 use std::ops::Deref;
 
@@ -14,7 +13,7 @@ pub trait StringBehavior {
     /// # Examples
     ///
     /// ```no_run
-    /// let s = StringB::new("hello");
+    /// let s = StringB::from("hello");
     /// let bytes = s.as_bytes();
     /// ```
     fn as_bytes(&self) -> &[u8];
@@ -24,27 +23,32 @@ pub trait StringBehavior {
     /// # Examples
     ///
     /// ```no_run
-    /// let s = StringB::new("hello");
+    /// let s = StringB::from("hello");
     /// let slice = s.as_str();
     /// ```
     fn as_str(&self) -> &str;
+
+    #[cfg(feature = "cstring")]
+    fn extract(&self) -> CString;
+
+    #[cfg(not(feature = "cstring"))]
+    fn extract(&self) -> String;
 
     /// Converts the value to a `String`.
     ///
     /// # Examples
     ///
     /// ```no_run
-    /// let s = StringB::new("hello");
+    /// let s = StringB::from("hello");
     /// let string = s.as_string();
     /// ```
     fn as_string(&self) -> String;
-
     /// Converts the string to uppercase.
     ///
     /// # Examples
     ///
     /// ```no_run
-    /// let s = StringB::new("hello");
+    /// let s = StringB::from("hello");
     /// assert_eq!(s.to_uppercase().as_str(), "HELLO");
     /// ```
     fn to_uppercase(&self) -> Self;
@@ -54,7 +58,7 @@ pub trait StringBehavior {
     /// # Examples
     ///
     /// ```no_run
-    /// let s = StringB::new("HELLO");
+    /// let s = StringB::from("HELLO");
     /// assert_eq!(s.to_lowercase().as_str(), "hello");
     /// ```
     fn to_lowercase(&self) -> Self;
@@ -64,7 +68,7 @@ pub trait StringBehavior {
     /// # Examples
     ///
     /// ```no_run
-    /// let s = StringB::new("  hello  ");
+    /// let s = StringB::from("  hello  ");
     /// assert_eq!(s.trim().as_str(), "hello");
     /// ```
     fn trim(&self) -> Self;
@@ -74,7 +78,7 @@ pub trait StringBehavior {
     /// # Examples
     ///
     /// ```no_run
-    /// let s = StringB::new("hello world");
+    /// let s = StringB::from("hello world");
     /// assert_eq!(s.replace("world", "planet").as_str(), "hello planet");
     /// ```
     fn replace(&self, from: &str, to: &str) -> Self;
@@ -84,26 +88,17 @@ pub trait StringBehavior {
     /// # Examples
     ///
     /// ```no_run
-    /// let s1 = StringB::new("hello");
+    /// let s1 = StringB::from("hello");
     /// let s2 = " world";
     /// assert_eq!(s1.concat(s2).as_str(), "hello world");
     /// ```
     fn concat<T: AsRef<str>>(&self, other: T) -> Self;
 
-    /// Creates a new `StringB` from a `Vec<u8>`, assuming it is valid UTF-8.
-    ///
-    /// # Examples
-    ///
-    /// ```no_run
-    /// let bytes = vec![104, 101, 108, 108, 111]; // "hello" in UTF-8
-    /// let s = StringB::from_utf8(bytes);
-    /// ```
-    fn as_string_lossy(&self) -> String;
     fn from_utf8(value: Vec<u8>) -> Self;
 }
 
 /// A custom string implementation with additional manipulation methods.
-#[derive(Debug, Clone, PartialEq, Eq, Default)]
+#[derive(Debug, Clone, PartialEq, Eq, Default, Hash, PartialOrd, Ord)]
 pub struct StringB {
     #[cfg(feature = "cstring")]
     pub value: CString,
@@ -112,26 +107,6 @@ pub struct StringB {
 }
 
 impl StringB {
-    #[cfg(feature = "cstring")]
-    pub fn new<S: Into<CString>>(value: S) -> Self {
-        StringB {
-            value: value.into(),
-        }
-    }
-
-    /// Creates a new instance of `StringB` with the provided value.
-    ///
-    /// # Examples
-    ///
-    /// ```no_run
-    /// let s = StringB::new("hello");
-    /// ```
-    pub fn new<S: Into<String>>(value: S) -> Self {
-        StringB {
-            value: value.into(),
-        }
-    }
-
     pub fn len(&self) -> usize {
         self.as_bytes().len()
     }
@@ -158,7 +133,10 @@ impl StringBehavior for StringB {
 
     #[cfg(feature = "cstring")]
     fn as_string(&self) -> String {
-        self.as_str().as_string()
+        self.value
+            .to_str()
+            .expect("CString is not valid UTF-8")
+            .to_string()
     }
 
     #[cfg(not(feature = "cstring"))]
@@ -166,61 +144,68 @@ impl StringBehavior for StringB {
         self.value.clone()
     }
 
+    #[cfg(feature = "cstring")]
+    fn extract(&self) -> CString {
+        self.value.clone()
+    }
+
+    #[cfg(not(feature = "cstring"))]
+    fn extract(&self) -> String {
+        self.as_string()
+    }
+
     fn to_uppercase(&self) -> Self {
         let upper_str = self.as_str().to_uppercase();
-        StringB::new(upper_str)
+        StringB::from(upper_str)
     }
 
     fn to_lowercase(&self) -> Self {
         let lower_str = self.as_str().to_lowercase();
-        StringB::new(lower_str)
+        StringB::from(lower_str)
     }
 
     fn trim(&self) -> Self {
         let trimmed_str = self.as_str().trim();
-        StringB::new(trimmed_str)
+        StringB::from(trimmed_str)
     }
 
     fn replace(&self, from: &str, to: &str) -> Self {
         let replaced_str = self.as_str().replace(from, to);
-        StringB::new(replaced_str)
+        StringB::from(replaced_str)
     }
 
     fn concat<T: AsRef<str>>(&self, other: T) -> Self {
         let mut result = String::from(self.as_str());
         result.push_str(other.as_ref());
-        StringB::new(result)
-    }
-
-    #[cfg(feature = "cstring")]
-    fn as_string_lossy(&self) -> String {
-        self.value.as_string_lossy().into_owned()
-    }
-
-    #[cfg(not(feature = "cstring"))]
-    fn as_string_lossy(&self) -> String {
-        self.value.clone()
+        StringB::from(result)
     }
 
     #[cfg(not(feature = "cstring"))]
     fn from_utf8(value: Vec<u8>) -> Self {
-        StringB::new(String::from_utf8(value).unwrap())
+        StringB::from(String::from_utf8(value).unwrap())
     }
 
     #[cfg(feature = "cstring")]
-    fn from_utf8(value: Vec<u8>) -> Result<Self, FromUtf8Error> {
-        let c_string = CString::new(value)?;
-        let string = c_string.inas_string()?;
-        Ok(StringB::new(string))
+    fn from_utf8(value: Vec<u8>) -> Self {
+        StringB {
+            value: CString::new(value).unwrap(),
+        }
     }
 }
 
 /// Implements the `Display` trait for `StringB`.
 ///
 /// This allows `StringB` instances to be formatted using the `{}` placeholder in format strings.
+#[cfg(feature = "cstring")]
 impl Display for StringB {
     fn fmt(&self, f: &mut Formatter) -> std::fmt::Result {
-        write!(f, "{}", self.as_string_lossy())
+        write!(f, "{}", self.as_string())
+    }
+}
+#[cfg(not(feature = "cstring"))]
+impl Display for StringB {
+    fn fmt(&self, f: &mut Formatter) -> std::fmt::Result {
+        write!(f, "{}", self.as_string())
     }
 }
 
@@ -238,18 +223,51 @@ impl Deref for StringB {
 /// Implements the `From<String>` trait for `StringB`.
 ///
 /// This allows creating a `StringB` instance from a `String`.
+#[cfg(not(feature = "cstring"))]
 impl From<String> for StringB {
     fn from(value: String) -> Self {
-        StringB::new(value)
+        StringB {
+            value: value.clone(),
+        }
     }
 }
 
 /// Implements the `From<&str>` trait for `StringB`.
 ///
 /// This allows creating a `StringB` instance from a `&str`.
+#[cfg(not(feature = "cstring"))]
 impl From<&str> for StringB {
     fn from(value: &str) -> Self {
-        StringB::new(value)
+        StringB {
+            value: value.to_string(),
+        }
+    }
+}
+
+#[cfg(feature = "cstring")]
+impl From<String> for StringB {
+    fn from(value: String) -> Self {
+        StringB {
+            value: CString::new(value).unwrap(),
+        }
+    }
+}
+
+#[cfg(feature = "cstring")]
+impl From<&str> for StringB {
+    fn from(value: &str) -> Self {
+        StringB {
+            value: CString::new(value).unwrap(),
+        }
+    }
+}
+
+#[cfg(feature = "cstring")]
+impl From<CString> for StringB {
+    fn from(value: CString) -> Self {
+        StringB {
+            value: value.clone(),
+        }
     }
 }
 
@@ -277,43 +295,43 @@ mod tests {
 
     #[test]
     fn test_len() {
-        let s = StringB::new("Hello");
+        let s = StringB::from("Hello");
         assert_eq!(s.len(), 5);
     }
 
     #[test]
     fn test_is_empty() {
-        let s = StringB::new("");
+        let s = StringB::from("");
         assert!(s.is_empty());
     }
 
     #[test]
     fn test_to_uppercase() {
-        let s = StringB::new("hello");
+        let s = StringB::from("hello");
         assert_eq!(s.to_uppercase().as_str(), "HELLO");
     }
 
     #[test]
     fn test_to_lowercase() {
-        let s = StringB::new("HELLO");
+        let s = StringB::from("HELLO");
         assert_eq!(s.to_lowercase().as_str(), "hello");
     }
 
     #[test]
     fn test_trim() {
-        let s = StringB::new("  hello  ");
+        let s = StringB::from("  hello  ");
         assert_eq!(s.trim().as_str(), "hello");
     }
 
     #[test]
     fn test_replace() {
-        let s = StringB::new("hello world");
+        let s = StringB::from("hello world");
         assert_eq!(s.replace("world", "planet").as_str(), "hello planet");
     }
 
     #[test]
     fn test_concat() {
-        let s1 = StringB::new("hello");
+        let s1 = StringB::from("hello");
         let s2 = " world";
         assert_eq!(s1.concat(s2).as_str(), "hello world");
     }

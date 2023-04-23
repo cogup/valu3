@@ -1,11 +1,9 @@
 use std::collections::{BTreeMap, HashMap};
-
 use crate::prelude::*;
 
 #[cfg(feature = "cstring")]
 impl PrimitiveType for CString {}
 
-#[cfg(not(feature = "cstring"))]
 impl PrimitiveType for String {}
 
 impl PrimitiveType for bool {}
