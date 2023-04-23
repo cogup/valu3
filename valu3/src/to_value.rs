@@ -1,6 +1,5 @@
-use std::collections::{BTreeMap, HashMap};
-
 use crate::prelude::*;
+use std::collections::{BTreeMap, HashMap};
 
 impl ToValueBehavior for Value {
     fn to_value(&self) -> Value {
@@ -11,14 +10,21 @@ impl ToValueBehavior for Value {
 #[cfg(feature = "cstring")]
 impl ToValueBehavior for CString {
     fn to_value(&self) -> Value {
-        Value::String(StringB::new(self.clone()))
+        Value::String(StringB::from(self.clone()))
+    }
+}
+
+#[cfg(feature = "cstring")]
+impl ToValueBehavior for String {
+    fn to_value(&self) -> Value {
+        Value::String(StringB::from(CString::new(self.clone()).unwrap()))
     }
 }
 
 #[cfg(not(feature = "cstring"))]
 impl ToValueBehavior for String {
     fn to_value(&self) -> Value {
-        Value::String(StringB::new(self.clone()))
+        Value::String(StringB::from(self.clone()))
     }
 }
 
@@ -30,13 +36,13 @@ impl ToValueBehavior for bool {
 
 impl ToValueBehavior for str {
     fn to_value(&self) -> Value {
-        Value::String(StringB::new(self.to_string()))
+        Value::String(StringB::from(self.to_string()))
     }
 }
 
 impl ToValueBehavior for &str {
     fn to_value(&self) -> Value {
-        Value::String(StringB::new(self.to_string()))
+        Value::String(StringB::from(self.to_string()))
     }
 }
 
@@ -198,7 +204,7 @@ mod test {
     fn test_string() {
         assert_eq!(
             "test".to_value(),
-            Value::String(StringB::new("test".to_string()))
+            Value::String(StringB::from("test".to_string()))
         );
     }
 

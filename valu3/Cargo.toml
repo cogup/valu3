@@ -24,6 +24,7 @@ default = ["parser"]
 parser = ["json"]
 json = []
 serde = ["dep:serde"]
+cstring = []
 
 [lib]
 doctest = false

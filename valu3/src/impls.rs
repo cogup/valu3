@@ -676,18 +676,25 @@ impl StringBehavior for Value {
         }
     }
 
-    #[cfg(feature = "cstring")]
-    fn as_string(&self) -> CString {
+    fn as_string(&self) -> String {
         match self {
             Value::String(string) => string.as_string(),
             _ => panic!("Unable to get a string from a value other than a string"),
         }
     }
 
-    #[cfg(not(feature = "cstring"))]
-    fn as_string(&self) -> String {
+    #[cfg(feature = "cstring")]
+    fn extract(&self) -> CString {
         match self {
-            Value::String(string) => string.as_string(),
+            Value::String(string) => string.extract(),
+            _ => panic!("Unable to get a string from a value other than a string"),
+        }
+    }
+
+    #[cfg(not(feature = "cstring"))]
+    fn extract(&self) -> String {
+        match self {
+            Value::String(string) => string.extract(),
             _ => panic!("Unable to get a string from a value other than a string"),
         }
     }
@@ -727,26 +734,53 @@ impl StringBehavior for Value {
         }
     }
 
-    #[cfg(feature = "cstring")]
-    fn as_string_lossy(&self) -> CString {
-        match self {
-            Value::String(string) => string.as_string_lossy(),
-            _ => panic!("Unable to get a string from a value other than a string"),
-        }
-    }
-
-    #[cfg(not(feature = "cstring"))]
-    fn as_string_lossy(&self) -> String {
-        match self {
-            Value::String(string) => string.as_string_lossy(),
-            _ => panic!("Unable to get a string from a value other than a string"),
-        }
-    }
-
     fn from_utf8(value: Vec<u8>) -> Self {
         StringB::from_utf8(value).to_value()
     }
 }
+
+impl From<()> for Value {
+    fn from(_: ()) -> Self {
+        Value::Null
+    }
+}
+
+impl<T> From<T> for Value
+where
+    T: ToValueBehavior + PrimitiveType,
+{
+    fn from(value: T) -> Self {
+        value.to_value()
+    }
+}
+
+impl<K, V> From<Vec<(K, V)>> for Value
+where
+    K: ValueKeyBehavior,
+    V: ToValueBehavior + PrimitiveType,
+{
+    fn from(value: Vec<(K, V)>) -> Self {
+        let mut object = Object::default();
+        for (key, value) in value {
+            object.insert(key, value.to_value());
+        }
+        Value::Object(object)
+    }
+}
+
+impl<K> From<Vec<(K, Value)>> for Value
+where
+    K: ValueKeyBehavior,
+{
+    fn from(value: Vec<(K, Value)>) -> Self {
+        let mut object = Object::default();
+        for (key, value) in value {
+            object.insert(key, value);
+        }
+        Value::Object(object)
+    }
+}
+
 
 #[cfg(test)]
 mod tests {
