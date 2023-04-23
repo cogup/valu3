@@ -137,15 +137,15 @@ mod tests {
         let value_boolean = Value::payload_to_value("{\"is_active\":true}").unwrap();
         assert_eq!(
             "{\n\t\"name\": \"John Doe\"\n}",
-            Value::to_json_inner(&value_str, 0)
+            value_str.to_json(JsonMode::Indented)
         );
         assert_eq!(
             "{\n\t\"age\": 30\n}",
-            Value::to_json_inner(&value_number, 0)
+            value_number.to_json(JsonMode::Indented)
         );
         assert_eq!(
             "{\n\t\"is_active\": true\n}",
-            Value::to_json_inner(&value_boolean, 0)
+            value_boolean.to_json(JsonMode::Indented)
         )
     }
 }
