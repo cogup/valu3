@@ -1,54 +1,99 @@
-//! This module provides a `Value` enum to represent different data types and
-//! a trait `ToValueBehavior` to convert them to `Value`. The supported data types
+//! This module provides a `DefaultValue` enum to represent different data types and
+//! a trait `ToValueBehavior` to convert them to `DefaultValue`. The supported data types
 //! are: String, Number, Boolean, Array, Object, Null, Undefined, and DateTime.
 //!
 //! # Examples
 //!
 //! ```
-//! use crate::{Array, DateTime, Number, Object, StringB, Value};
+//! use crate::{Array, DateTime, Number, Object, StringB, DefaultValue};
 //!
-//! let string_value = Value::String(StringB::from("hello".to_string()));
-//! let number_value = Value::Number(Number::from(42));
-//! let boolean_value = Value::Boolean(true);
-//! let null_value = Value::Null;
-//! let undefined_value = Value::Undefined;
-//! let mut datetime_value = Value::DateTime(DateTime::from("2023-04-05T00:00:00Z"));
+//! let string_value = DefaultValue::String(StringB::from("hello".to_string()));
+//! let number_value = DefaultValue::Number(Number::from(42));
+//! let boolean_value = DefaultValue::Boolean(true);
+//! let null_value = DefaultValue::Null;
+//! let undefined_value = DefaultValue::Undefined;
+//! let mut datetime_value = DefaultValue::DateTime(DateTime::from("2023-04-05T00:00:00Z"));
 //! ```
 use crate::prelude::*;
 use std::fmt::{Display, Formatter};
 
 /// Represents different data types as an enum.
 #[derive(Debug, Clone, PartialEq)]
-pub enum Value {
+pub enum DefaultValue {
     String(StringB),
     Number(Number),
     Boolean(bool),
-    Array(Array),
+    Array(Array<Self>),
     Object(Object),
     Null,
     Undefined,
     DateTime(DateTime),
 }
 
-impl Default for Value {
-    fn default() -> Self {
-        Value::Null
+impl ValueBehavior for DefaultValue {
+    fn from_array(target: Vec<Self>) -> Self {
+        todo!()
     }
 }
 
-impl ValueTrait for Value {}
+impl Default for DefaultValue {
+    fn default() -> Self {
+        DefaultValue::Null
+    }
+}
 
-impl Display for Value {
+impl ValueTrait for DefaultValue {}
+
+impl Display for DefaultValue {
     fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
         match self {
-            Value::String(_) => write!(f, "{}", self.to_json(JsonMode::Indented)),
-            Value::Number(value) => write!(f, "{}", value),
-            Value::Boolean(value) => write!(f, "{}", if *value { "true" } else { "false" }),
-            Value::Array(_) => write!(f, "{}", self.to_json(JsonMode::Indented)),
-            Value::Object(_) => write!(f, "{}", self.to_json(JsonMode::Indented)),
-            Value::Null => write!(f, "null"),
-            Value::Undefined => write!(f, "undefined"),
-            Value::DateTime(value) => write!(f, "{}", value),
+            DefaultValue::String(_) => write!(f, "{}", self.to_json(JsonMode::Indented)),
+            DefaultValue::Number(DefaultValue) => write!(f, "{}", DefaultValue),
+            DefaultValue::Boolean(DefaultValue) => {
+                write!(f, "{}", if *DefaultValue { "true" } else { "false" })
+            }
+            DefaultValue::Array(_) => write!(f, "{}", self.to_json(JsonMode::Indented)),
+            DefaultValue::Object(_) => write!(f, "{}", self.to_json(JsonMode::Indented)),
+            DefaultValue::Null => write!(f, "null"),
+            DefaultValue::Undefined => write!(f, "undefined"),
+            DefaultValue::DateTime(DefaultValue) => write!(f, "{}", DefaultValue),
+        }
+    }
+}
+
+pub struct ValueIter<'a> {
+    DefaultValue: &'a DefaultValue,
+    state: ValueIterState<'a>,
+}
+
+enum ValueIterState<'a> {
+    Array(std::slice::Iter<'a, DefaultValue>),
+    Object(ObjectIter<'a>),
+    None,
+}
+
+impl<'a> Iterator for ValueIter<'a> {
+    type Item = &'a DefaultValue;
+
+    fn next(&mut self) -> Option<Self::Item> {
+        match &mut self.state {
+            ValueIterState::Array(iter) => iter.next(),
+            ValueIterState::Object(iter) => iter.next().map(|(_key, DefaultValue)| DefaultValue),
+            ValueIterState::None => None,
+        }
+    }
+}
+
+impl<'a> DefaultValue {
+    pub fn iter(&'a self) -> ValueIter<'a> {
+        let state = match self {
+            DefaultValue::Array(array) => ValueIterState::Array(array.values.iter()),
+            DefaultValue::Object(object) => ValueIterState::Object(ObjectIter::new(object)),
+            _ => ValueIterState::None,
+        };
+        ValueIter {
+            DefaultValue: self,
+            state,
         }
     }
 }
@@ -57,34 +102,34 @@ impl Display for Value {
 mod tests {
     use crate::prelude::*;
 
-    // Tests for the different data types and their conversion to a `Value` enum.
+    // Tests for the different data types and their conversion to a `DefaultValue` enum.
     #[test]
     fn test_value_string() {
         let string = StringB::from("hello".to_string());
-        let value = Value::String(string.clone());
-        assert_eq!(value, Value::String(string));
+        let DefaultValue = DefaultValue::String(string.clone());
+        assert_eq!(DefaultValue, DefaultValue::String(string));
     }
 
     #[test]
     fn test_value_number() {
         let number = Number::from(42);
-        let value = Value::Number(number);
-        assert_eq!(value, Value::Number(Number::from(42)));
+        let DefaultValue = DefaultValue::Number(number);
+        assert_eq!(DefaultValue, DefaultValue::Number(Number::from(42)));
     }
 
     #[test]
     fn test_value_boolean() {
-        let value = Value::Boolean(true);
-        assert_eq!(value, Value::Boolean(true));
+        let DefaultValue = DefaultValue::Boolean(true);
+        assert_eq!(DefaultValue, DefaultValue::Boolean(true));
     }
 
     #[test]
     fn test_value_array() {
         let mut array = Array::new();
-        array.push(Value::Number(Number::from(1)));
-        array.push(Value::Number(Number::from(2)));
-        let value = Value::Array(array.clone());
-        assert_eq!(value, Value::Array(array));
+        array.push(DefaultValue::Number(Number::from(1)));
+        array.push(DefaultValue::Number(Number::from(2)));
+        let DefaultValue = DefaultValue::Array(array.clone());
+        assert_eq!(DefaultValue, DefaultValue::Array(array));
     }
 
     #[test]
@@ -92,28 +137,28 @@ mod tests {
         let mut object = Object::default();
         object.insert(
             "key".to_string(),
-            Value::String(StringB::from("value".to_string())),
+            DefaultValue::String(StringB::from("DefaultValue".to_string())),
         );
-        let value = Value::Object(object.clone());
-        assert_eq!(value, Value::Object(object));
+        let DefaultValue = DefaultValue::Object(object.clone());
+        assert_eq!(DefaultValue, DefaultValue::Object(object));
     }
 
     #[test]
     fn test_value_null() {
-        let value = Value::Null;
-        assert_eq!(value, Value::Null);
+        let DefaultValue = DefaultValue::Null;
+        assert_eq!(DefaultValue, DefaultValue::Null);
     }
 
     #[test]
     fn test_value_undefined() {
-        let value = Value::Undefined;
-        assert_eq!(value, Value::Undefined);
+        let DefaultValue = DefaultValue::Undefined;
+        assert_eq!(DefaultValue, DefaultValue::Undefined);
     }
 
     #[test]
     fn test_value_datetime() {
         let datetime = DateTime::from("2023-04-05T00:00:00Z");
-        let value = Value::DateTime(datetime.clone());
-        assert_eq!(value, Value::DateTime(datetime));
+        let DefaultValue = DefaultValue::DateTime(datetime.clone());
+        assert_eq!(DefaultValue, DefaultValue::DateTime(datetime));
     }
 }

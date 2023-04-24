@@ -1,84 +1,121 @@
 use crate::prelude::*;
 use std::collections::{BTreeMap, HashMap};
 
-impl ToValueBehavior for Value {
+impl<Value> ToValueBehavior<Value> for Value
+where
+    Value: ValueBehavior,
+{
     fn to_value(&self) -> Value {
         self.clone()
     }
 }
 
 #[cfg(feature = "cstring")]
-impl ToValueBehavior for CString {
+impl<Value> ToValueBehavior<Value> for CString
+where
+    Value: ValueBehavior,
+{
     fn to_value(&self) -> Value {
         Value::String(StringB::from(self.clone()))
     }
 }
 
 #[cfg(feature = "cstring")]
-impl ToValueBehavior for String {
+impl<Value> ToValueBehavior<Value> for String
+where
+    Value: ValueBehavior,
+{
     fn to_value(&self) -> Value {
         Value::String(StringB::from(CString::new(self.clone()).unwrap()))
     }
 }
 
 #[cfg(not(feature = "cstring"))]
-impl ToValueBehavior for String {
+impl<Value> ToValueBehavior<Value> for String
+where
+    Value: ValueBehavior,
+{
     fn to_value(&self) -> Value {
         Value::String(StringB::from(self.clone()))
     }
 }
 
-impl ToValueBehavior for bool {
+impl<Value> ToValueBehavior<Value> for bool
+where
+    Value: ValueBehavior,
+{
     fn to_value(&self) -> Value {
         Value::Boolean(*self)
     }
 }
 
-impl ToValueBehavior for str {
+impl<Value> ToValueBehavior<Value> for str
+where
+    Value: ValueBehavior,
+{
     fn to_value(&self) -> Value {
         Value::String(StringB::from(self.to_string()))
     }
 }
 
-impl ToValueBehavior for &str {
+impl<Value> ToValueBehavior<Value> for &str
+where
+    Value: ValueBehavior,
+{
     fn to_value(&self) -> Value {
         Value::String(StringB::from(self.to_string()))
     }
 }
 
-impl ToValueBehavior for StringB {
+impl<Value> ToValueBehavior<Value> for StringB
+where
+    Value: ValueBehavior,
+{
     fn to_value(&self) -> Value {
         Value::String(StringB::from(self.clone()))
     }
 }
 
-impl ToValueBehavior for Array {
+impl<Value> ToValueBehavior<Value> for Array<Value>
+where
+    Value: ValueBehavior,
+{
     fn to_value(&self) -> Value {
         Value::Array(self.clone())
     }
 }
 
-impl ToValueBehavior for DateTime {
+impl<Value> ToValueBehavior<Value> for DateTime
+where
+    Value: ValueBehavior,
+{
     fn to_value(&self) -> Value {
         Value::DateTime(self.clone())
     }
 }
 
-impl ToValueBehavior for Number {
+impl<Value> ToValueBehavior<Value> for Number
+where
+    Value: ValueBehavior,
+{
     fn to_value(&self) -> Value {
         Value::Number(self.clone())
     }
 }
 
-impl ToValueBehavior for Object {
+impl<Value> ToValueBehavior<Value> for Object
+where
+    Value: ValueBehavior,
+{
     fn to_value(&self) -> Value {
         Value::Object(self.clone())
     }
 }
 
-impl<T> ToValueBehavior for Option<T>
+impl<T, Value> ToValueBehavior<Value> for Option<T>
 where
-    T: ToValueBehavior,
+    T: ToValueBehavior<Value>,
+    Value: ValueBehavior,
 {
     fn to_value(&self) -> Value {
         match self {
@@ -88,19 +125,21 @@ where
     }
 }
 
-impl<V> ToValueBehavior for Vec<V>
+impl<V, Value> ToValueBehavior<Value> for Vec<V>
 where
-    V: ToValueBehavior,
+    V: ToValueBehavior<Value>,
+    Value: ValueBehavior,
 {
     fn to_value(&self) -> Value {
         Array::from(self.iter().map(|v| v.to_value()).collect::<Vec<Value>>()).to_value()
     }
 }
 
-impl<K, V> ToValueBehavior for HashMap<K, V>
+impl<K, V, Value> ToValueBehavior<Value> for HashMap<K, V>
 where
     K: ValueKeyBehavior,
-    V: ToValueBehavior,
+    V: ToValueBehavior<Value>,
+    Value: ValueBehavior,
 {
     fn to_value(&self) -> Value {
         Object::from(
@@ -112,10 +151,11 @@ where
     }
 }
 
-impl<T, V> ToValueBehavior for BTreeMap<T, V>
+impl<T, V, Value> ToValueBehavior<Value> for BTreeMap<T, V>
 where
     T: ValueKeyBehavior,
-    V: ToValueBehavior,
+    V: ToValueBehavior<Value>,
+    Value: ValueBehavior,
 {
     fn to_value(&self) -> Value {
         Object::from(
@@ -128,61 +168,91 @@ where
 }
 
 // Numerics
-impl ToValueBehavior for u8 {
+impl<Value> ToValueBehavior<Value> for u8
+where
+    Value: ValueBehavior,
+{
     fn to_value(&self) -> Value {
         Value::Number(Number::from(*self))
     }
 }
 
-impl ToValueBehavior for u16 {
+impl<Value> ToValueBehavior<Value> for u16
+where
+    Value: ValueBehavior,
+{
     fn to_value(&self) -> Value {
         Value::Number(Number::from(*self))
     }
 }
 
-impl ToValueBehavior for u32 {
+impl<Value> ToValueBehavior<Value> for u32
+where
+    Value: ValueBehavior,
+{
     fn to_value(&self) -> Value {
         Value::Number(Number::from(*self))
     }
 }
 
-impl ToValueBehavior for u64 {
+impl<Value> ToValueBehavior<Value> for u64
+where
+    Value: ValueBehavior,
+{
     fn to_value(&self) -> Value {
         Value::Number(Number::from(*self))
     }
 }
 
-impl ToValueBehavior for i8 {
+impl<Value> ToValueBehavior<Value> for i8
+where
+    Value: ValueBehavior,
+{
     fn to_value(&self) -> Value {
         Value::Number(Number::from(*self))
     }
 }
 
-impl ToValueBehavior for i16 {
+impl<Value> ToValueBehavior<Value> for i16
+where
+    Value: ValueBehavior,
+{
     fn to_value(&self) -> Value {
         Value::Number(Number::from(*self))
     }
 }
 
-impl ToValueBehavior for i32 {
+impl<Value> ToValueBehavior<Value> for i32
+where
+    Value: ValueBehavior,
+{
     fn to_value(&self) -> Value {
         Value::Number(Number::from(*self))
     }
 }
 
-impl ToValueBehavior for i64 {
+impl<Value> ToValueBehavior<Value> for i64
+where
+    Value: ValueBehavior,
+{
     fn to_value(&self) -> Value {
         Value::Number(Number::from(*self))
     }
 }
 
-impl ToValueBehavior for f32 {
+impl<Value> ToValueBehavior<Value> for f32
+where
+    Value: ValueBehavior,
+{
     fn to_value(&self) -> Value {
         Value::Number(Number::from(*self))
     }
 }
 
-impl ToValueBehavior for f64 {
+impl<Value> ToValueBehavior<Value> for f64
+where
+    Value: ValueBehavior,
+{
     fn to_value(&self) -> Value {
         Value::Number(Number::from(*self))
     }
@@ -196,15 +266,15 @@ mod test {
 
     #[test]
     fn test_boolean() {
-        assert_eq!(true.to_value(), Value::Boolean(true));
-        assert_eq!(false.to_value(), Value::Boolean(false));
+        assert_eq!(true.to_value(), DefaultValue::Boolean(true));
+        assert_eq!(false.to_value(), DefaultValue::Boolean(false));
     }
 
     #[test]
     fn test_string() {
         assert_eq!(
             "test".to_value(),
-            Value::String(StringB::from("test".to_string()))
+            DefaultValue::String(StringB::from("test".to_string()))
         );
     }
 
@@ -212,7 +282,7 @@ mod test {
     fn test_array() {
         assert_eq!(
             vec![1, 2, 3].to_value(),
-            Value::Array(Array::from(vec![1, 2, 3]))
+            DefaultValue::Array(Array::from(vec![1, 2, 3]))
         );
     }
 

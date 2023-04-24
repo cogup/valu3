@@ -65,8 +65,9 @@ impl Value {
             }
             Value::Array(a) => {
                 let contents: Vec<_> = a
+                    .clone()
                     .into_iter()
-                    .map(|value| Value::to_json_inner(value, children + 1))
+                    .map(|value| Value::to_json_inner(&value, children + 1))
                     .collect();
                 format!(
                     "[\n\t{}{}\n{}]",

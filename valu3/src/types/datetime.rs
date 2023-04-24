@@ -63,10 +63,10 @@ impl From<NaiveDate> for DateTime {
     }
 }
 
-impl From<Value> for DateTime {
-    fn from(value: Value) -> Self {
+impl From<DefaultValue> for DateTime {
+    fn from(value: DefaultValue) -> Self {
         match value {
-            Value::DateTime(datetime) => datetime,
+            DefaultValue::DateTime(datetime) => datetime,
             _ => panic!("Cannot convert value to DateTime"),
         }
     }

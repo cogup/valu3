@@ -10,7 +10,7 @@
 //! ```
 //! use valu3::prelude::*;
 //!
-//! let string_value = hello".to_value();
+//! let string_value = "hello".to_value();
 //! let number_value = 42.to_value();
 //! let boolean_value = true.to_value();
 //! let null_value = Value::Null;
@@ -24,6 +24,7 @@
 //! assert!(undefined_value, Value::Undefined);
 //! datetime_value.add_days(1);
 //! ```
+//! 
 pub mod primitives;
 pub mod prelude;
 pub mod traits;

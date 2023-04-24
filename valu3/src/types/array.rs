@@ -25,11 +25,17 @@ pub trait ArrayBehavior {
 
 /// Represents an array of `Value`s.
 #[derive(Debug, Clone, PartialEq)]
-pub struct Array {
+pub struct Array<Value>
+where
+    Value: ValueBehavior,
+{
     pub values: Vec<Value>,
 }
 
-impl Array {
+impl<Value> Array<Value>
+where
+    Value: ValueBehavior,
+{
     /// Creates a new empty `Array`.
     ///
     /// # Examples
@@ -86,20 +92,28 @@ impl Array {
     }
 }
 
-
-impl ArrayBehavior for Array {
+impl<Value> ArrayBehavior for Array<Value>
+where
+    Value: ValueBehavior,
+{
     fn pop(&mut self) -> Option<Value> {
         self.values.pop()
     }
 }
 
-impl Default for Array {
+impl<Value> Default for Array<Value>
+where
+    Value: ValueBehavior,
+{
     fn default() -> Self {
         Self::new()
     }
 }
 
-impl Display for Array {
+impl<Value> Display for Array<Value>
+where
+    Value: ValueBehavior,
+{
     fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
         write!(f, "[")?;
 
@@ -115,34 +129,21 @@ impl Display for Array {
     }
 }
 
-impl IntoIterator for Array {
+impl<Value> Iterator for Array<Value>
+where
+    Value: ValueBehavior,
+{
     type Item = Value;
-    type IntoIter = std::vec::IntoIter<Self::Item>;
 
-    fn into_iter(self) -> Self::IntoIter {
-        self.values.into_iter()
+    fn next(&mut self) -> Option<Self::Item> {
+        self.values.pop()
     }
 }
 
-impl<'a> IntoIterator for &'a Array {
-    type Item = &'a Value;
-    type IntoIter = std::slice::Iter<'a, Value>;
-
-    fn into_iter(self) -> Self::IntoIter {
-        self.values.iter()
-    }
-}
-
-impl<'a> IntoIterator for &'a mut Array {
-    type Item = &'a mut Value;
-    type IntoIter = std::slice::IterMut<'a, Value>;
-
-    fn into_iter(self) -> Self::IntoIter {
-        self.values.iter_mut()
-    }
-}
-
-impl From<Value> for Array {
+impl<Value> From<Value> for Array<Value>
+where
+    Value: ValueBehavior,
+{
     fn from(value: Value) -> Self {
         let mut array = Array::new();
         array.push(value);
@@ -150,7 +151,10 @@ impl From<Value> for Array {
     }
 }
 
-impl<T: Into<Value>> From<Vec<T>> for Array {
+impl<T: Into<T>, Value> From<Vec<T>> for Array<Value>
+where
+    Value: ValueBehavior,
+{
     fn from(values: Vec<T>) -> Self {
         let converted_values = values.into_iter().map(Into::into).collect();
         Self {
@@ -159,7 +163,10 @@ impl<T: Into<Value>> From<Vec<T>> for Array {
     }
 }
 
-impl<K: AsRef<str>, V: Into<Value>> From<HashMap<K, V>> for Array {
+impl<K: AsRef<str>, V: Into<Value>, Value> From<HashMap<K, V>> for Array<Value>
+where
+    Value: ValueBehavior,
+{
     fn from(map: HashMap<K, V>) -> Self {
         let values = map
             .into_iter()
@@ -173,7 +180,10 @@ impl<K: AsRef<str>, V: Into<Value>> From<HashMap<K, V>> for Array {
     }
 }
 
-impl<K: AsRef<str>, V: Into<Value>> From<BTreeMap<K, V>> for Array {
+impl<K: AsRef<str>, V: Into<Value>, Value> From<BTreeMap<K, V>> for Array<Value>
+where
+    Value: ValueBehavior,
+{
     fn from(map: BTreeMap<K, V>) -> Self {
         let values = map
             .into_iter()

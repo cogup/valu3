@@ -14,7 +14,7 @@ impl PrimitiveType for &str {}
 
 impl PrimitiveType for StringB {}
 
-impl PrimitiveType for Array {}
+impl<Value> PrimitiveType for Array<Value> where Value: ValueBehavior  {}
 
 impl PrimitiveType for DateTime {}
 

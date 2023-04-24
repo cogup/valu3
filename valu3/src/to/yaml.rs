@@ -23,6 +23,7 @@ impl Value {
             Value::String(s) => format!(r#" "{}"\n"#, s.to_string()),
             Value::Array(a) => {
                 let elements: Vec<String> = a
+                    .clone()
                     .into_iter()
                     .map(|v| format!(" - {}", v.to_yaml_with_indent(indent + 2)))
                     .collect();
@@ -60,8 +61,8 @@ impl Value {
 
 #[test]
 fn test_to_yaml() {
-    use std::collections::BTreeMap;
     use crate::prelude::*;
+    use std::collections::BTreeMap;
 
     let object = Object::from(
         vec![

@@ -4,7 +4,7 @@ use std::iter::Iterator;
 
 pub trait ObjectBehavior {
     /// Removes a key-value pair from the object and returns the associated value. If the key is not present, returns `None`.
-    fn remove<T>(&mut self, key: &T) -> Option<Value>
+    fn remove<T>(&mut self, key: &T) -> Option<DefaultValue>
     where
         T: ValueKeyBehavior;
 
@@ -17,19 +17,19 @@ pub trait ObjectBehavior {
     fn keys(&self) -> Vec<&ValueKey>;
 
     /// Returns a `Vec` of references to the values in the object, in the order they were inserted.
-    fn values(&self) -> Vec<&Value>;
+    fn values(&self) -> Vec<&DefaultValue>;
 }
 
 /// An enum representing a JSON object as a `BTreeMap` or a `HashMap`.
 #[derive(Debug, Clone, PartialEq)]
 pub enum Object {
-    BTreeMap(BTreeMap<ValueKey, Value>),
-    HashMap(HashMap<ValueKey, Value>),
+    BTreeMap(BTreeMap<ValueKey, DefaultValue>),
+    HashMap(HashMap<ValueKey, DefaultValue>),
 }
 
 impl Object {
     /// Returns a reference to the value associated with the specified key, or `None` if the key is not present.
-    pub fn get<T>(&self, key: T) -> Option<&Value>
+    pub fn get<T>(&self, key: T) -> Option<&DefaultValue>
     where
         T: ValueKeyBehavior,
     {
@@ -40,7 +40,7 @@ impl Object {
         }
     }
 
-    pub fn get_mut<T>(&mut self, key: T) -> Option<&mut Value>
+    pub fn get_mut<T>(&mut self, key: T) -> Option<&mut DefaultValue>
     where
         T: ValueKeyBehavior,
     {
@@ -59,7 +59,7 @@ impl Object {
         }
     }
 
-    pub fn insert<T>(&mut self, key: T, value: Value) -> Option<Value>
+    pub fn insert<T>(&mut self, key: T, value: DefaultValue) -> Option<DefaultValue>
     where
         T: ValueKeyBehavior,
     {
@@ -86,7 +86,7 @@ impl Object {
 }
 
 impl ObjectBehavior for Object {
-    fn remove<T>(&mut self, key: &T) -> Option<Value>
+    fn remove<T>(&mut self, key: &T) -> Option<DefaultValue>
     where
         T: ValueKeyBehavior,
     {
@@ -115,7 +115,7 @@ impl ObjectBehavior for Object {
         }
     }
 
-    fn values(&self) -> Vec<&Value> {
+    fn values(&self) -> Vec<&DefaultValue> {
         match self {
             Object::BTreeMap(map) => map.values().collect(),
             Object::HashMap(map) => map.values().collect(),
@@ -133,26 +133,27 @@ impl Default for Object {
 impl<T, V> From<BTreeMap<T, V>> for Object
 where
     T: ValueKeyBehavior,
-    V: ToValueBehavior,
+    V: ToValueBehavior<DefaultValue>,
 {
-    /// Converts BTreeMap<ValueKey, Value> into Object.
+    /// Converts BTreeMap<ValueKey, DefaultValue> into Object.
     fn from(value: BTreeMap<T, V>) -> Self {
         Object::BTreeMap(
             value
                 .iter()
                 .map(|(k, v)| (k.to_value_key(), v.to_value()))
-                .collect::<BTreeMap<ValueKey, Value>>(),
+                .collect::<BTreeMap<ValueKey, DefaultValue>>(),
         )
     }
 }
 
-impl<T, V> From<HashMap<T, V>> for Object
+impl<T, Value> From<HashMap<T, Value>> for Object
 where
     T: ValueKeyBehavior,
-    V: ToValueBehavior,
+    Value: ToValueBehavior<Value>,
+    Value: ValueBehavior
 {
-    /// Converts BTreeMap<ValueKey, Value> into Object.
-    fn from(value: HashMap<T, V>) -> Self {
+    /// Converts BTreeMap<ValueKey, DefaultValue> into Object.
+    fn from(value: HashMap<T, Value>) -> Self {
         Object::HashMap(
             value
                 .iter()
@@ -162,16 +163,16 @@ where
     }
 }
 
-impl From<HashMap<ValueKey, Value>> for Object {
-    /// Converts HashMap<ValueKey, Value> into Object.
-    fn from(value: HashMap<ValueKey, Value>) -> Self {
+impl From<HashMap<ValueKey, DefaultValue>> for Object {
+    /// Converts HashMap<ValueKey, DefaultValue> into Object.
+    fn from(value: HashMap<ValueKey, DefaultValue>) -> Self {
         Object::HashMap(value)
     }
 }
 
-impl From<Vec<(ValueKey, Value)>> for Object {
+impl From<Vec<(ValueKey, DefaultValue)>> for Object {
     /// Converts a vector of key-value pairs into an Object.
-    fn from(value: Vec<(ValueKey, Value)>) -> Self {
+    fn from(value: Vec<(ValueKey, DefaultValue)>) -> Self {
         Object::HashMap(value.into_iter().collect())
     }
 }
@@ -179,7 +180,7 @@ impl From<Vec<(ValueKey, Value)>> for Object {
 impl<T, V> From<Vec<(T, V)>> for Object
 where
     T: ValueKeyBehavior,
-    V: ToValueBehavior,
+    V: ToValueBehavior<DefaultValue>,
 {
     /// Converts a vector of key-value pairs into an Object.
     fn from(value: Vec<(T, V)>) -> Self {
@@ -192,9 +193,9 @@ where
     }
 }
 
-impl Into<HashMap<ValueKey, Value>> for Object {
-    /// Converts Object into HashMap<ValueKey, Value>.
-    fn into(self) -> HashMap<ValueKey, Value> {
+impl Into<HashMap<ValueKey, DefaultValue>> for Object {
+    /// Converts Object into HashMap<ValueKey, DefaultValue>.
+    fn into(self) -> HashMap<ValueKey, DefaultValue> {
         match self {
             Object::BTreeMap(map) => map.into_iter().collect(),
             Object::HashMap(map) => map,
@@ -202,9 +203,9 @@ impl Into<HashMap<ValueKey, Value>> for Object {
     }
 }
 
-impl Into<BTreeMap<ValueKey, Value>> for Object {
-    /// Converts Object into BTreeMap<ValueKey, Value>.
-    fn into(self) -> BTreeMap<ValueKey, Value> {
+impl Into<BTreeMap<ValueKey, DefaultValue>> for Object {
+    /// Converts Object into BTreeMap<ValueKey, DefaultValue>.
+    fn into(self) -> BTreeMap<ValueKey, DefaultValue> {
         match self {
             Object::BTreeMap(map) => map,
             Object::HashMap(map) => map.into_iter().collect(),
@@ -219,13 +220,23 @@ pub struct ObjectIter<'a> {
     state: IterState<'a>,
 }
 
+impl<'a> ObjectIter<'a> {
+    pub fn new(object: &'a Object) -> Self {
+        let state = match object {
+            Object::BTreeMap(map) => IterState::BTreeMap(map.iter()),
+            Object::HashMap(map) => IterState::HashMap(map.iter()),
+        };
+        Self { object, state }
+    }
+}
+
 enum IterState<'a> {
-    BTreeMap(std::collections::btree_map::Iter<'a, ValueKey, Value>),
-    HashMap(std::collections::hash_map::Iter<'a, ValueKey, Value>),
+    BTreeMap(std::collections::btree_map::Iter<'a, ValueKey, DefaultValue>),
+    HashMap(std::collections::hash_map::Iter<'a, ValueKey, DefaultValue>),
 }
 
 impl<'a> Iterator for ObjectIter<'a> {
-    type Item = (&'a ValueKey, &'a Value);
+    type Item = (&'a ValueKey, &'a DefaultValue);
 
     fn next(&mut self) -> Option<Self::Item> {
         match &mut self.state {
@@ -258,7 +269,7 @@ mod tests {
 
     #[test]
     fn test_object_iter() {
-        let value1 = Value::Null;
+        let value1 = DefaultValue::Null;
         let value2 = StringB::from("ok").to_value();
 
         let mut map = BTreeMap::new();
@@ -285,12 +296,12 @@ mod tests {
     #[test]
     fn test_object_from_vec() {
         let vec = vec![
-            ("key1".to_string(), Value::Null),
+            ("key1".to_string(), DefaultValue::Null),
             ("key2".to_string(), StringB::from("ok").to_value()),
         ];
 
         let obj = Object::from(vec);
-        assert_eq!(obj.get("key1"), Some(&Value::Null));
+        assert_eq!(obj.get("key1"), Some(&DefaultValue::Null));
         assert_eq!(obj.get("key2"), Some(&StringB::from("ok").to_value()));
     }
 }

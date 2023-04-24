@@ -1,21 +1,34 @@
 use crate::prelude::*;
 use std::collections::{BTreeMap, HashMap};
 
+pub trait ValueBehavior: Sized {
+    fn from_array(target: Vec<Self>) -> Self;
+}
+
 pub trait PrimitiveType {}
 
 /// A trait for converting types to `Value`.
-pub trait ToValueBehavior {
+pub trait ToValueBehavior<Value>
+where
+    Value: ValueBehavior,
+{
     /// Converts a type into a `Value`.
     fn to_value(&self) -> Value;
 }
 /// A trait for converting `Value` to types.
-pub trait FromValueBehavior {
+pub trait FromValueBehavior<Value>
+where
+    Value: ValueBehavior,
+{
     type Item;
     /// Converts a `Value` into a type.
     fn from_value(value: Value) -> Option<Self::Item>;
 }
 
-impl FromValueBehavior for i8 {
+impl<Value> FromValueBehavior<Value> for i8
+where
+    Value: ValueBehavior,
+{
     type Item = i8;
 
     fn from_value(value: Value) -> Option<Self::Item> {
@@ -27,7 +40,10 @@ impl FromValueBehavior for i8 {
     }
 }
 
-impl FromValueBehavior for i16 {
+impl<Value> FromValueBehavior<Value> for i16
+where
+    Value: ValueBehavior,
+{
     type Item = i16;
 
     fn from_value(value: Value) -> Option<Self::Item> {
@@ -39,7 +55,10 @@ impl FromValueBehavior for i16 {
     }
 }
 
-impl FromValueBehavior for i32 {
+impl<Value> FromValueBehavior<Value> for i32
+where
+    Value: ValueBehavior,
+{
     type Item = i32;
 
     fn from_value(value: Value) -> Option<Self::Item> {
@@ -51,7 +70,10 @@ impl FromValueBehavior for i32 {
     }
 }
 
-impl FromValueBehavior for i64 {
+impl<Value> FromValueBehavior<Value> for i64
+where
+    Value: ValueBehavior,
+{
     type Item = i64;
 
     fn from_value(value: Value) -> Option<Self::Item> {
@@ -63,7 +85,10 @@ impl FromValueBehavior for i64 {
     }
 }
 
-impl FromValueBehavior for i128 {
+impl<Value> FromValueBehavior<Value> for i128
+where
+    Value: ValueBehavior,
+{
     type Item = i128;
 
     fn from_value(value: Value) -> Option<Self::Item> {
@@ -75,7 +100,10 @@ impl FromValueBehavior for i128 {
     }
 }
 
-impl FromValueBehavior for u8 {
+impl<Value> FromValueBehavior<Value> for u8
+where
+    Value: ValueBehavior,
+{
     type Item = u8;
 
     fn from_value(value: Value) -> Option<Self::Item> {
@@ -87,7 +115,10 @@ impl FromValueBehavior for u8 {
     }
 }
 
-impl FromValueBehavior for u16 {
+impl<Value> FromValueBehavior<Value> for u16
+where
+    Value: ValueBehavior,
+{
     type Item = u16;
 
     fn from_value(value: Value) -> Option<Self::Item> {
@@ -99,7 +130,10 @@ impl FromValueBehavior for u16 {
     }
 }
 
-impl FromValueBehavior for u32 {
+impl<Value> FromValueBehavior<Value> for u32
+where
+    Value: ValueBehavior,
+{
     type Item = u32;
 
     fn from_value(value: Value) -> Option<Self::Item> {
@@ -111,7 +145,10 @@ impl FromValueBehavior for u32 {
     }
 }
 
-impl FromValueBehavior for u64 {
+impl<Value> FromValueBehavior<Value> for u64
+where
+    Value: ValueBehavior,
+{
     type Item = u64;
 
     fn from_value(value: Value) -> Option<Self::Item> {
@@ -123,7 +160,10 @@ impl FromValueBehavior for u64 {
     }
 }
 
-impl FromValueBehavior for u128 {
+impl<Value> FromValueBehavior<Value> for u128
+where
+    Value: ValueBehavior,
+{
     type Item = u128;
 
     fn from_value(value: Value) -> Option<Self::Item> {
@@ -135,7 +175,10 @@ impl FromValueBehavior for u128 {
     }
 }
 
-impl FromValueBehavior for f32 {
+impl<Value> FromValueBehavior<Value> for f32
+where
+    Value: ValueBehavior,
+{
     type Item = f32;
 
     fn from_value(value: Value) -> Option<Self::Item> {
@@ -147,7 +190,10 @@ impl FromValueBehavior for f32 {
     }
 }
 
-impl FromValueBehavior for f64 {
+impl<Value> FromValueBehavior<Value> for f64
+where
+    Value: ValueBehavior,
+{
     type Item = f64;
 
     fn from_value(value: Value) -> Option<Self::Item> {
@@ -160,7 +206,10 @@ impl FromValueBehavior for f64 {
 }
 
 #[cfg(feature = "cstring")]
-impl FromValueBehavior for String {
+impl<Value> FromValueBehavior<Value> for String
+where
+    Value: ValueBehavior,
+{
     type Item = String;
 
     fn from_value(value: Value) -> Option<Self::Item> {
@@ -173,7 +222,10 @@ impl FromValueBehavior for String {
 }
 
 #[cfg(not(feature = "cstring"))]
-impl FromValueBehavior for String {
+impl<Value> FromValueBehavior<Value> for String
+where
+    Value: ValueBehavior,
+{
     type Item = String;
 
     fn from_value(value: Value) -> Option<Self::Item> {
@@ -185,7 +237,10 @@ impl FromValueBehavior for String {
     }
 }
 
-impl FromValueBehavior for bool {
+impl<Value> FromValueBehavior<Value> for bool
+where
+    Value: ValueBehavior,
+{
     type Item = bool;
 
     fn from_value(value: Value) -> Option<Self::Item> {
@@ -197,11 +252,12 @@ impl FromValueBehavior for bool {
     }
 }
 
-impl<T> FromValueBehavior for Vec<T>
+impl<T, Value> FromValueBehavior<Value> for Vec<T>
 where
-    T: FromValueBehavior,
+    T: FromValueBehavior<Value>,
+    Value: ValueBehavior,
 {
-    type Item = Vec<<T as FromValueBehavior>::Item>;
+    type Item = Vec<<T as FromValueBehavior<Value>>::Item>;
 
     fn from_value(value: Value) -> Option<Self::Item> {
         if let Value::Array(array) = value {
@@ -218,11 +274,12 @@ where
 }
 
 #[cfg(feature = "cstring")]
-impl<T> FromValueBehavior for HashMap<CString, T>
+impl<T, Value> FromValueBehavior<Value> for HashMap<CString, T>
 where
-    T: FromValueBehavior,
+    T: FromValueBehavior<Value>,
+    Value: ValueBehavior,
 {
-    type Item = HashMap<CString, <T as FromValueBehavior>::Item>;
+    type Item = HashMap<CString, <T as FromValueBehavior<Value>>::Item>;
 
     fn from_value(value: Value) -> Option<Self::Item> {
         if let Value::Object(array) = value {
@@ -240,11 +297,12 @@ where
 }
 
 #[cfg(feature = "cstring")]
-impl<T> FromValueBehavior for BTreeMap<CString, T>
+impl<T, Value> FromValueBehavior<Value> for BTreeMap<CString, T>
 where
-    T: FromValueBehavior,
+    T: FromValueBehavior<Value>,
+    Value: ValueBehavior,
 {
-    type Item = BTreeMap<CString, <T as FromValueBehavior>::Item>;
+    type Item = BTreeMap<CString, <T as FromValueBehavior<Value>>::Item>;
 
     fn from_value(value: Value) -> Option<Self::Item> {
         if let Value::Object(array) = value {
@@ -262,11 +320,12 @@ where
 }
 
 #[cfg(feature = "cstring")]
-impl<T> FromValueBehavior for HashMap<String, T>
+impl<T, Value> FromValueBehavior<Value> for HashMap<String, T>
 where
-    T: FromValueBehavior,
+    T: FromValueBehavior<Value>,
+    Value: ValueBehavior,
 {
-    type Item = HashMap<String, <T as FromValueBehavior>::Item>;
+    type Item = HashMap<String, <T as FromValueBehavior<Value>>::Item>;
 
     fn from_value(value: Value) -> Option<Self::Item> {
         if let Value::Object(array) = value {
@@ -284,11 +343,12 @@ where
 }
 
 #[cfg(feature = "cstring")]
-impl<T> FromValueBehavior for BTreeMap<String, T>
+impl<T, Value> FromValueBehavior<Value> for BTreeMap<String, T>
 where
-    T: FromValueBehavior,
+    T: FromValueBehavior<Value>,
+    Value: ValueBehavior,
 {
-    type Item = BTreeMap<String, <T as FromValueBehavior>::Item>;
+    type Item = BTreeMap<String, <T as FromValueBehavior<Value>>::Item>;
 
     fn from_value(value: Value) -> Option<Self::Item> {
         if let Value::Object(array) = value {
@@ -306,11 +366,12 @@ where
 }
 
 #[cfg(not(feature = "cstring"))]
-impl<T> FromValueBehavior for HashMap<String, T>
+impl<T, Value> FromValueBehavior<Value> for HashMap<String, T>
 where
-    T: FromValueBehavior,
+    T: FromValueBehavior<Value>,
+    Value: ValueBehavior,
 {
-    type Item = HashMap<String, <T as FromValueBehavior>::Item>;
+    type Item = HashMap<String, <T as FromValueBehavior<Value>>::Item>;
 
     fn from_value(value: Value) -> Option<Self::Item> {
         if let Value::Object(array) = value {
@@ -328,11 +389,12 @@ where
 }
 
 #[cfg(not(feature = "cstring"))]
-impl<T> FromValueBehavior for BTreeMap<String, T>
+impl<T, Value> FromValueBehavior<Value> for BTreeMap<String, T>
 where
-    T: FromValueBehavior,
+    T: FromValueBehavior<Value>,
+    Value: ValueBehavior,
 {
-    type Item = BTreeMap<String, <T as FromValueBehavior>::Item>;
+    type Item = BTreeMap<String, <T as FromValueBehavior<Value>>::Item>;
 
     fn from_value(value: Value) -> Option<Self::Item> {
         if let Value::Object(array) = value {
@@ -346,11 +408,12 @@ where
     }
 }
 
-impl<T> FromValueBehavior for Option<T>
+impl<T, Value> FromValueBehavior<Value> for Option<T>
 where
-    T: FromValueBehavior,
+    T: FromValueBehavior<Value>,
+    Value: ValueBehavior,
 {
-    type Item = Option<<T as FromValueBehavior>::Item>;
+    type Item = Option<<T as FromValueBehavior<Value>>::Item>;
 
     fn from_value(value: Value) -> Option<Self::Item> {
         match value {

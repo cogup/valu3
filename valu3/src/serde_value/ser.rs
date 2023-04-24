@@ -19,8 +19,8 @@ impl Serialize for Value {
             }
             Value::Array(value) => {
                 let mut seq = serializer.serialize_seq(Some(value.len()))?;
-                for elem in value {
-                    seq.serialize_element(elem)?;
+                for elem in value.clone().into_iter() {
+                    seq.serialize_element(&elem)?;
                 }
                 seq.end()
             }
