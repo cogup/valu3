@@ -13,3 +13,5 @@ pub use crate::Error;
 pub use crate::impls::*;
 #[cfg(feature = "cstring")]
 pub use std::ffi::CString;
+#[cfg(feature = "derive")]
+pub use valu3_derive::*;

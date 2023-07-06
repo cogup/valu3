@@ -10,7 +10,7 @@ use pest::iterators::Pair;
 
 impl Value {
     pub fn payload_to_value(str: &str) -> Result<Value, Error> {
-        let value = match JSONParser::parse(Rule::json, str) {
+        let value = match JSONParser::parse(Rule::json, str.trim()) {
             Ok(mut pairs) => match pairs.next() {
                 Some(pair) => Self::parse_value(pair),
                 None => return Err(Error::NonParseble),
@@ -66,7 +66,7 @@ mod tests {
 
     #[test]
     fn json() {
-        let raw = "{
+        let raw: &str = "{
         \"test\": true,
         \"test2\": \"ok\",
         \"test3\": [0, 1]
