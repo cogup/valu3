@@ -40,7 +40,7 @@ impl Value {
         };
     }
 
-    fn len(&self) -> usize {
+    pub fn len(&self) -> usize {
         match self {
             Value::Array(array) => array.len(),
             Value::Object(object) => object.len(),
@@ -49,7 +49,7 @@ impl Value {
         }
     }
 
-    fn is_empty(&self) -> bool {
+    pub fn is_empty(&self) -> bool {
         match self {
             Value::Array(array) => array.is_empty(),
             Value::Object(object) => object.is_empty(),
@@ -58,161 +58,161 @@ impl Value {
         }
     }
 
-    fn is_string(&self) -> bool {
+    pub fn is_string(&self) -> bool {
         match self {
             Value::String(_) => true,
             _ => false,
         }
     }
 
-    fn is_number(&self) -> bool {
+    pub fn is_number(&self) -> bool {
         match self {
             Value::Number(_) => true,
             _ => false,
         }
     }
 
-    fn is_array(&self) -> bool {
+    pub fn is_array(&self) -> bool {
         match self {
             Value::Array(_) => true,
             _ => false,
         }
     }
 
-    fn is_object(&self) -> bool {
+    pub fn is_object(&self) -> bool {
         match self {
             Value::Object(_) => true,
             _ => false,
         }
     }
 
-    fn is_bool(&self) -> bool {
+    pub fn is_bool(&self) -> bool {
         match self {
             Value::Boolean(_) => true,
             _ => false,
         }
     }
 
-    fn is_null(&self) -> bool {
+    pub fn is_null(&self) -> bool {
         match self {
             Value::Null => true,
             _ => false,
         }
     }
 
-    fn is_undefined(&self) -> bool {
+    pub fn is_undefined(&self) -> bool {
         match self {
             Value::Undefined => true,
             _ => false,
         }
     }
 
-    fn as_string_b(&self) -> Option<&StringB> {
+    pub fn as_string_b(&self) -> Option<&StringB> {
         match self {
             Value::String(string) => Some(&string),
             _ => None,
         }
     }
 
-    fn as_number(&self) -> Option<&Number> {
+    pub fn as_number(&self) -> Option<&Number> {
         match self {
             Value::Number(number) => Some(number),
             _ => None,
         }
     }
 
-    fn as_array(&self) -> Option<&Array> {
+    pub fn as_array(&self) -> Option<&Array> {
         match self {
             Value::Array(array) => Some(array),
             _ => None,
         }
     }
 
-    fn as_object(&self) -> Option<&Object> {
+    pub fn as_object(&self) -> Option<&Object> {
         match self {
             Value::Object(object) => Some(object),
             _ => None,
         }
     }
 
-    fn as_bool(&self) -> Option<&bool> {
+    pub fn as_bool(&self) -> Option<&bool> {
         match self {
             Value::Boolean(boolean) => Some(boolean),
             _ => None,
         }
     }
 
-    fn as_null(&self) -> Option<()> {
+    pub fn as_null(&self) -> Option<()> {
         match self {
             Value::Null => Some(()),
             _ => None,
         }
     }
 
-    fn as_undefined(&self) -> Option<()> {
+    pub fn as_undefined(&self) -> Option<()> {
         match self {
             Value::Undefined => Some(()),
             _ => None,
         }
     }
 
-    fn as_string_mut(&mut self) -> Option<&mut StringB> {
+    pub fn as_string_mut(&mut self) -> Option<&mut StringB> {
         match self {
             Value::String(string) => Some(string),
             _ => None,
         }
     }
 
-    fn as_number_mut(&mut self) -> Option<&mut Number> {
+    pub fn as_number_mut(&mut self) -> Option<&mut Number> {
         match self {
             Value::Number(number) => Some(number),
             _ => None,
         }
     }
 
-    fn as_array_mut(&mut self) -> Option<&mut Array> {
+    pub fn as_array_mut(&mut self) -> Option<&mut Array> {
         match self {
             Value::Array(array) => Some(array),
             _ => None,
         }
     }
 
-    fn as_object_mut(&mut self) -> Option<&mut Object> {
+    pub fn as_object_mut(&mut self) -> Option<&mut Object> {
         match self {
             Value::Object(object) => Some(object),
             _ => None,
         }
     }
 
-    fn as_bool_mut(&mut self) -> Option<&mut bool> {
+    pub fn as_bool_mut(&mut self) -> Option<&mut bool> {
         match self {
             Value::Boolean(boolean) => Some(boolean),
             _ => None,
         }
     }
 
-    fn as_null_mut(&mut self) -> Option<()> {
+    pub fn as_null_mut(&mut self) -> Option<()> {
         match self {
             Value::Null => Some(()),
             _ => None,
         }
     }
 
-    fn as_undefined_mut(&mut self) -> Option<()> {
+    pub fn as_undefined_mut(&mut self) -> Option<()> {
         match self {
             Value::Undefined => Some(()),
             _ => None,
         }
     }
 
-    fn push<T: ToValueBehavior>(&mut self, value: T) {
+    pub fn push<T: ToValueBehavior>(&mut self, value: T) {
         match self {
             Value::Array(array) => array.push(value.to_value()),
             _ => panic!("Unable to push values ​​into a type other than an array"),
         }
     }
 
-    fn insert<T, V>(&mut self, key: T, value: V) -> Option<Value>
+    pub fn insert<T, V>(&mut self, key: T, value: V) -> Option<Value>
     where
         T: ValueKeyBehavior,
         V: ToValueBehavior,
@@ -927,7 +927,6 @@ where
         Value::Object(object)
     }
 }
-
 
 #[cfg(test)]
 mod tests {
