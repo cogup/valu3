@@ -58,6 +58,153 @@ impl Value {
         }
     }
 
+    fn is_string(&self) -> bool {
+        match self {
+            Value::String(_) => true,
+            _ => false,
+        }
+    }
+
+    fn is_number(&self) -> bool {
+        match self {
+            Value::Number(_) => true,
+            _ => false,
+        }
+    }
+
+    fn is_array(&self) -> bool {
+        match self {
+            Value::Array(_) => true,
+            _ => false,
+        }
+    }
+
+    fn is_object(&self) -> bool {
+        match self {
+            Value::Object(_) => true,
+            _ => false,
+        }
+    }
+
+    fn is_bool(&self) -> bool {
+        match self {
+            Value::Boolean(_) => true,
+            _ => false,
+        }
+    }
+
+    fn is_null(&self) -> bool {
+        match self {
+            Value::Null => true,
+            _ => false,
+        }
+    }
+
+    fn is_undefined(&self) -> bool {
+        match self {
+            Value::Undefined => true,
+            _ => false,
+        }
+    }
+
+    fn as_string(&self) -> Option<&StringB> {
+        match self {
+            Value::String(string) => Some(&string),
+            _ => None,
+        }
+    }
+
+    fn as_number(&self) -> Option<&Number> {
+        match self {
+            Value::Number(number) => Some(number),
+            _ => None,
+        }
+    }
+
+    fn as_array(&self) -> Option<&Array> {
+        match self {
+            Value::Array(array) => Some(array),
+            _ => None,
+        }
+    }
+
+    fn as_object(&self) -> Option<&Object> {
+        match self {
+            Value::Object(object) => Some(object),
+            _ => None,
+        }
+    }
+
+    fn as_bool(&self) -> Option<&bool> {
+        match self {
+            Value::Boolean(boolean) => Some(boolean),
+            _ => None,
+        }
+    }
+
+    fn as_null(&self) -> Option<()> {
+        match self {
+            Value::Null => Some(()),
+            _ => None,
+        }
+    }
+
+    fn as_undefined(&self) -> Option<()> {
+        match self {
+            Value::Undefined => Some(()),
+            _ => None,
+        }
+    }
+
+    fn as_string_mut(&mut self) -> Option<&mut StringB> {
+        match self {
+            Value::String(string) => Some(string),
+            _ => None,
+        }
+    }
+
+    fn as_number_mut(&mut self) -> Option<&mut Number> {
+        match self {
+            Value::Number(number) => Some(number),
+            _ => None,
+        }
+    }
+
+    fn as_array_mut(&mut self) -> Option<&mut Array> {
+        match self {
+            Value::Array(array) => Some(array),
+            _ => None,
+        }
+    }
+
+    fn as_object_mut(&mut self) -> Option<&mut Object> {
+        match self {
+            Value::Object(object) => Some(object),
+            _ => None,
+        }
+    }
+
+    fn as_bool_mut(&mut self) -> Option<&mut bool> {
+        match self {
+            Value::Boolean(boolean) => Some(boolean),
+            _ => None,
+        }
+    }
+
+    fn as_null_mut(&mut self) -> Option<()> {
+        match self {
+            Value::Null => Some(()),
+            _ => None,
+        }
+    }
+
+    fn as_undefined_mut(&mut self) -> Option<()> {
+        match self {
+            Value::Undefined => Some(()),
+            _ => None,
+        }
+    }
+
     fn push<T: ToValueBehavior>(&mut self, value: T) {
         match self {
             Value::Array(array) => array.push(value.to_value()),
@@ -837,5 +984,29 @@ mod tests {
         let string = Value::from("hello");
         let concat = string.concat("!");
         assert!(concat == StringB::from("hello!").to_value())
+    }
+
+    #[test]
+    fn test_value_as_string() {
+        let string = Value::from("hello");
+        assert!(string.as_string() == Some(&StringB::from("hello")))
+    }
+
+    #[test]
+    fn test_value_as_number() {
+        let number = Value::from(3.14);
+        assert!(number.as_number() == Some(&Number::from(3.14)))
+    }
+
+    #[test]
+    fn test_value_as_array_mut() {
+        let mut array = Value::from(vec![1, 2, 3]);
+        assert!(array.as_array_mut().unwrap().get_mut(0) == Some(&mut 1.to_value()))
+    }
+
+    #[test]
+    fn test_value_as_object_mut() {
+        let mut object = Value::from(HashMap::from_iter(vec![("1", 3.14.to_value())].into_iter()));
+        assert!(object.as_object_mut().unwrap().get_mut("1") == Some(&mut 3.14.to_value()))
     }
 }

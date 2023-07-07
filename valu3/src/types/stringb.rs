@@ -114,6 +114,16 @@ impl StringB {
     pub fn is_empty(&self) -> bool {
         self.len() == 0
     }
+
+    #[cfg(feature = "cstring")]
+    pub fn as_string(&self) -> String {
+        self.value.to_str().unwrap().to_string()
+    }
+    
+    #[cfg(not(feature = "cstring"))]
+    pub fn as_string(&self) -> String {
+        self.value.clone()
+    }
 }
 
 impl StringBehavior for StringB {
