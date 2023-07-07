@@ -1,6 +1,6 @@
 [package]
 name = "valu3"
-version = "0.2.0"
+version = "0.3.0"
 edition = "2021"
 license = "MIT OR Apache-2.0"
 readme = "crates-io.md"
@@ -10,7 +10,6 @@ keywords = ["value", "generic", "type", "serde", "any"]
 description = "A generic serialization/deserialization/type framework"
 categories = ["encoding", "no-std"]
 documentation = "https://docs.rs/valu3"
-
 
 [dependencies]
 pest="2.5.7"
