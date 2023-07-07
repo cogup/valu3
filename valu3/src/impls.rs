@@ -107,7 +107,7 @@ impl Value {
         }
     }
 
-    fn as_string(&self) -> Option<&StringB> {
+    fn as_string_b(&self) -> Option<&StringB> {
         match self {
             Value::String(string) => Some(&string),
             _ => None,
@@ -989,7 +989,7 @@ mod tests {
     #[test]
     fn test_value_as_string() {
         let string = Value::from("hello");
-        assert!(string.as_string() == Some(&StringB::from("hello")))
+        assert!(string.as_string_b() == Some(&StringB::from("hello")))
     }
 
     #[test]
