@@ -18,7 +18,7 @@ quote = "1.0.9"
 proc-macro2 = "1.0.56"
 
 [dev-dependencies]
-valu3 = { version="0.1", path = "../valu3" }
+valu3 = { version="0.1.9", path = "../valu3" }
 
 [lib]
 proc-macro = true
