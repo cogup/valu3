@@ -50,6 +50,3 @@ pub enum Error {
     NonParseble,
     NotNumber,
 }
-
-#[cfg(feature = "derive")]
-mod test_derive;

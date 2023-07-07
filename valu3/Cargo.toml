@@ -21,7 +21,7 @@ serde = { version = "1.0.159", features = ["derive"], optional = true }
 valu3-derive = { path = "../valu3_derive", optional = true }
 
 [features]
-default = ["parser", "derive"]
+default = ["parser"]
 parser = ["json"]
 json = []
 serde = ["dep:serde"]

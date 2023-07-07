@@ -77,44 +77,8 @@ fn to_value_enum_impl(
 ) -> proc_macro2::TokenStream {
     let variant_transforms = variants.iter().map(|variant| {
         let variant_name = &variant.ident;
-        let fields = match &variant.fields {
-            Fields::Named(fields) => fields
-                .named
-                .iter()
-                .map(|field| {
-                    let name = match field.ident.as_ref() {
-                        Some(name) => name,
-                        None => panic!("ToValueBehavior cannot be derived for unnamed fields"),
-                    };
-                    let field_name_string = name.to_string();
-                    quote! {
-                        map.insert(#field_name_string.to_string(), (&self.#name).to_value());
-                    }
-                })
-                .collect::<Vec<_>>(),
-            Fields::Unnamed(fields) => fields
-                .unnamed
-                .iter()
-                .enumerate()
-                .map(|(index, _field)| {
-                    let index = syn::Index::from(index);
-                    quote! {
-                        <_ as ToValueBehavior>::to_value(&self.#index)
-                    }
-                })
-                .collect::<Vec<_>>(),
-            Fields::Unit => {
-                return quote! {
-                    Value::String(stringify!(#variant_name).to_owned())
-                }
-            }
-        };
-
         quote! {
-            #name::#variant_name { #(#fields),* } => Value::Object(vec![
-                ("type".to_owned(), Value::String(stringify!(#variant_name).to_owned())),
-                #(#fields),*
-            ].into_iter().collect()),
+            #name::#variant_name => Value::from(stringify!(#variant_name)),
         }
     });
 
@@ -135,34 +99,77 @@ pub fn from_value_derive(input: TokenStream) -> TokenStream {
     let ast = parse_macro_input!(input as DeriveInput);
 
     // Get the name and fields of the struct being derived.
-    let struct_name = &ast.ident;
-    let struct_fields: Fields = match ast.data {
-        Data::Struct(data_struct) => data_struct.fields,
-        Data::Enum(data_enum) => {
-            let variants = data_enum.variants;
-            let mut variant_names = Vec::new();
-            // let mut variant_types = Vec::new();
+    let target_name = &ast.ident;
 
-            for variant in variants.iter() {
-                let variant_name = &variant.ident;
-                // let variant_type = match &variant.fields {
-                //     Fields::Unnamed(fields) => {
-                //         let field = fields.unnamed.first().unwrap();
-                //         &field.ty
-                //     }
-                //     _ => {
-                //         panic!("Can only derive FromValueBehavior for an enum with unnamed fields.")
-                //     }
-                // };
+    match ast.data {
+        Data::Struct(data_struct) => {
+            // Define a new implementation of the `FromValueBehavior` trait for the struct.
+            let mut field_names = Vec::new();
+            let mut from_value_exprs = Vec::new();
 
-                variant_names.push(variant_name.clone());
-                // variant_types.push(variant_type.clone());
+            if let Fields::Named(fields) = data_struct.fields {
+                for field in fields.named.iter() {
+                    let field_name = match field.ident.as_ref() {
+                        Some(name) => name,
+                        None => panic!(
+                            "Can only derive FromValueBehavior for a struct with named fields."
+                        ),
+                    };
+                    let field_type = &field.ty;
+
+                    field_names.push(field_name.clone());
+
+                    from_value_exprs.push(quote! {
+                        #field_name: {
+                            let item = match map.get(stringify!(#field_name)) {
+                                Some(item) => item.clone(),
+                                None => return None,
+                            };
+                            match <#field_type as FromValueBehavior>::from_value(item) {
+                                Some(item) => item,
+                                None => return None,
+                            }
+                        }
+                    });
+                }
+            } else {
+                panic!("Can only derive FromValueBehavior for a struct with named fields.");
             }
 
             let expanded = quote! {
-                impl PrimitiveType for #struct_name {}
+                impl FromValueBehavior for #target_name {
+                    type Item = Self;
 
-                impl FromValueBehavior for #struct_name {
+                    fn from_value(value: Value) -> Option<Self> {
+                        if let Value::Object(map) = value {
+                            Some(
+                                Self {
+                                    #(#from_value_exprs),*
+                                }
+                            )
+                        } else {
+                            None
+                        }
+                    }
+                }
+            };
+
+            // Return the generated code as a `TokenStream`.
+            TokenStream::from(expanded)
+        }
+        Data::Enum(data_enum) => {
+            let variants = data_enum.variants;
+            let mut variant_names = Vec::new();
+
+            for variant in variants.iter() {
+                let variant_name = &variant.ident;
+                variant_names.push(variant_name.clone());
+            }
+
+            let expanded = quote! {
+                impl PrimitiveType for #target_name {}
+
+                impl FromValueBehavior for #target_name {
                     type Item = Self;
 
                     fn from_value(value: Value) -> Option<Self> {
@@ -170,7 +177,7 @@ pub fn from_value_derive(input: TokenStream) -> TokenStream {
                             Value::String(value) => {
                                 match value.as_str() {
                                     #(
-                                        stringify!(#variant_names) => Some(#struct_name::#variant_names),
+                                        stringify!(#variant_names) => Some(#target_name::#variant_names),
                                     )*
                                     _ => None,
                                 }
@@ -181,62 +188,10 @@ pub fn from_value_derive(input: TokenStream) -> TokenStream {
                 }
             };
 
-            return TokenStream::from(expanded);
+            TokenStream::from(expanded)
         }
         _ => panic!("Can only derive FromValueBehavior for a struct."),
-    };
-
-    // Define a new implementation of the `FromValueBehavior` trait for the struct.
-    let mut field_names = Vec::new();
-    let mut from_value_exprs = Vec::new();
-
-    if let Fields::Named(fields) = struct_fields {
-        for field in fields.named.iter() {
-            let field_name = match field.ident.as_ref() {
-                Some(name) => name,
-                None => panic!("Can only derive FromValueBehavior for a struct with named fields."),
-            };
-            let field_type = &field.ty;
-
-            field_names.push(field_name.clone());
-
-            from_value_exprs.push(quote! {
-                #field_name: {
-                    let item = match map.get(stringify!(#field_name)) {
-                        Some(item) => item.clone(),
-                        None => return None,
-                    };
-                    match <#field_type as FromValueBehavior>::from_value(item) {
-                        Some(item) => item,
-                        None => return None,
-                    }
-                }
-            });
-        }
-    } else {
-        panic!("Can only derive FromValueBehavior for a struct with named fields.");
     }
-
-    let expanded = quote! {
-        impl FromValueBehavior for #struct_name {
-            type Item = Self;
-
-            fn from_value(value: Value) -> Option<Self> {
-                if let Value::Object(map) = value {
-                    Some(
-                        Self {
-                            #(#from_value_exprs),*
-                        }
-                    )
-                } else {
-                    None
-                }
-            }
-        }
-    };
-
-    // Return the generated code as a `TokenStream`.
-    TokenStream::from(expanded)
 }
 
 #[proc_macro_derive(ToJson)]
