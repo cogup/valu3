@@ -50,3 +50,6 @@ pub enum Error {
     NonParseble,
     NotNumber,
 }
+
+#[cfg(test)]
+mod tests;

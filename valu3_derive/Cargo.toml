@@ -19,7 +19,3 @@ proc-macro2 = "1.0.56"
 
 [lib]
 proc-macro = true
-
-[[example]]
-name = "derive"
-required-features = []
