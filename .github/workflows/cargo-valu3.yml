@@ -2,8 +2,8 @@ name: Cargo Publish Valu3
 
 on:
   push:
-    branches:
-      - main
+    tags:
+      - '*'
     paths:
       - "valu3/**"
 
