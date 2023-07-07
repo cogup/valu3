@@ -224,7 +224,7 @@ pub enum NumberType {
 /// num.set_u8(42);
 /// assert_eq!(num.get_u8(), Some(42));
 /// ```
-#[derive(Debug, Clone, PartialEq, Default)]
+#[derive(Debug, Clone, PartialEq, Default, PartialOrd)]
 pub struct Number {
     pub u8: Option<u8>,
     pub u16: Option<u16>,

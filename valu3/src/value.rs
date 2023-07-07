@@ -18,7 +18,7 @@ use crate::prelude::*;
 use std::fmt::{Display, Formatter};
 
 /// Represents different data types as an enum.
-#[derive(Debug, Clone, PartialEq)]
+#[derive(Debug, Clone, PartialEq, PartialOrd)]
 pub enum Value {
     String(StringB),
     Number(Number),
@@ -116,4 +116,22 @@ mod tests {
         let value = Value::DateTime(datetime.clone());
         assert_eq!(value, Value::DateTime(datetime));
     }
+
+    #[test]
+    fn test_partial_eq() {
+        let value1 = Value::String(StringB::from("hello".to_string()));
+        let value2 = Value::String(StringB::from("hello".to_string()));
+        assert!(value1 == value2);
+    }
+
+    #[test]
+    fn test_partial_ord() {
+        let value1 = Value::Number(Number::from(3.14));
+        let value2 = Value::Number(Number::from(3.141));
+        assert!(value1 < value2);
+        assert!(value2 > value1);
+        assert_eq!(value1 >= value2, false);
+        assert_eq!(value2 <= value1, false);
+    }
+    
 }

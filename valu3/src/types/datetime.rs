@@ -49,7 +49,7 @@ pub trait DateTimeBehavior {
 /// * `Date(NaiveDate)` - Represents a date without timezone information.
 /// * `Time(NaiveTime)` - Represents a time without date and timezone information.
 /// * `DateTime(ChDateTime<chrono::Utc>)` - Represents a date-time with timezone information.
-#[derive(Debug, Clone, PartialEq)]
+#[derive(Debug, Clone, PartialEq, PartialOrd)]
 pub enum DateTime {
     Date(NaiveDate),
     Time(NaiveTime),

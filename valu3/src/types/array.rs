@@ -24,7 +24,7 @@ pub trait ArrayBehavior {
 }
 
 /// Represents an array of `Value`s.
-#[derive(Debug, Clone, PartialEq)]
+#[derive(Debug, Clone, PartialEq, PartialOrd)]
 pub struct Array {
     pub values: Vec<Value>,
 }
