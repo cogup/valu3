@@ -241,6 +241,14 @@ where
     }
 }
 
+impl FromValueBehavior for Value {
+    type Item = Value;
+
+    fn from_value(value: Value) -> Option<Self::Item> {
+        Some(value)
+    }
+}
+
 #[cfg(feature = "cstring")]
 impl<T> FromValueBehavior for HashMap<CString, T>
 where
