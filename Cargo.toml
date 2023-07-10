@@ -3,3 +3,4 @@ members = [
     "valu3",
     "valu3_derive",
 ]
+resolver = "2"

@@ -1,17 +1,18 @@
 extern crate proc_macro;
 use proc_macro::TokenStream;
 use quote::quote;
-use syn::{parse_macro_input, Data, DeriveInput, Fields, Variant};
+use syn::{parse_macro_input, Data, DeriveInput, Fields, Generics, Variant};
 
 #[proc_macro_derive(ToValue)]
 pub fn to_value_derive(input: TokenStream) -> TokenStream {
     let input = parse_macro_input!(input as DeriveInput);
 
     let name = input.ident;
+    let generics = input.generics;
 
     let to_value_impl = match input.data {
-        Data::Struct(data) => to_value_struct_impl(name, data.fields),
-        Data::Enum(data) => to_value_enum_impl(name, data.variants),
+        Data::Struct(data) => to_value_struct_impl(name, generics, data.fields),
+        Data::Enum(data) => to_value_enum_impl(name, generics, data.variants),
         Data::Union(_) => panic!("ToValueBehavior cannot be derived for unions"),
     };
 
@@ -22,7 +23,13 @@ pub fn to_value_derive(input: TokenStream) -> TokenStream {
     TokenStream::from(expanded)
 }
 
-fn to_value_struct_impl(name: syn::Ident, fields: Fields) -> proc_macro2::TokenStream {
+fn to_value_struct_impl(
+    name: syn::Ident,
+    generics: Generics,
+    fields: Fields,
+) -> proc_macro2::TokenStream {
+    let (impl_generics, ty_generics, where_clause) = generics.split_for_impl();
+
     let field_transforms = match fields {
         Fields::Named(fields) => fields
             .named
@@ -51,7 +58,7 @@ fn to_value_struct_impl(name: syn::Ident, fields: Fields) -> proc_macro2::TokenS
             .collect::<Vec<_>>(),
         Fields::Unit => {
             return quote! {
-                impl ToValueBehavior for #name {
+                impl #impl_generics ToValueBehavior for  #name #ty_generics #where_clause {
                     fn to_value(&self) -> Value {
                         Value::Null
                     }
@@ -61,7 +68,7 @@ fn to_value_struct_impl(name: syn::Ident, fields: Fields) -> proc_macro2::TokenS
     };
 
     quote! {
-        impl ToValueBehavior for #name {
+        impl #impl_generics ToValueBehavior  for #name #ty_generics #where_clause {
             fn to_value(&self) -> Value {
                 let mut map: std::collections::HashMap<String, Value>= std::collections::HashMap::new();
                 #(#field_transforms)*
@@ -73,8 +80,11 @@ fn to_value_struct_impl(name: syn::Ident, fields: Fields) -> proc_macro2::TokenS
 
 fn to_value_enum_impl(
     name: syn::Ident,
+    generics: Generics,
     variants: syn::punctuated::Punctuated<Variant, syn::Token![,]>,
 ) -> proc_macro2::TokenStream {
+    let (impl_generics, ty_generics, where_clause) = generics.split_for_impl();
+
     let variant_transforms = variants.iter().map(|variant| {
         let variant_name = &variant.ident;
         quote! {
@@ -83,7 +93,7 @@ fn to_value_enum_impl(
     });
 
     quote! {
-        impl ToValueBehavior for #name {
+        impl #impl_generics ToValueBehavior for #name #ty_generics #where_clause {
             fn to_value(&self) -> Value {
                 match self {
                     #(#variant_transforms)*
@@ -100,6 +110,8 @@ pub fn from_value_derive(input: TokenStream) -> TokenStream {
 
     // Get the name and fields of the struct being derived.
     let target_name = &ast.ident;
+    let target_generics = &ast.generics;
+    let (impl_generics, ty_generics, where_clause) = target_generics.split_for_impl();
 
     match ast.data {
         Data::Struct(data_struct) => {
@@ -137,7 +149,7 @@ pub fn from_value_derive(input: TokenStream) -> TokenStream {
             }
 
             let expanded = quote! {
-                impl FromValueBehavior for #target_name {
+                impl #impl_generics FromValueBehavior for #target_name #ty_generics #where_clause {
                     type Item = Self;
 
                     fn from_value(value: Value) -> Option<Self> {
@@ -154,7 +166,6 @@ pub fn from_value_derive(input: TokenStream) -> TokenStream {
                 }
             };
 
-            // Return the generated code as a `TokenStream`.
             TokenStream::from(expanded)
         }
         Data::Enum(data_enum) => {
@@ -167,9 +178,9 @@ pub fn from_value_derive(input: TokenStream) -> TokenStream {
             }
 
             let expanded = quote! {
-                impl PrimitiveType for #target_name {}
+                impl #impl_generics PrimitiveType for #target_name #ty_generics #where_clause {}
 
-                impl FromValueBehavior for #target_name {
+                impl #impl_generics FromValueBehavior for #target_name #ty_generics #where_clause {
                     type Item = Self;
 
                     fn from_value(value: Value) -> Option<Self> {
@@ -198,9 +209,11 @@ pub fn from_value_derive(input: TokenStream) -> TokenStream {
 pub fn to_json_derive(input: TokenStream) -> TokenStream {
     let ast = parse_macro_input!(input as DeriveInput);
     let name = &ast.ident;
+    let generics = &ast.generics;
+    let (impl_generics, ty_generics, where_clause) = generics.split_for_impl();
 
     let gen = quote! {
-        impl ToJsonBehavior for #name {
+        impl #impl_generics ToJsonBehavior for #name #ty_generics #where_clause {
             fn to_json(&self) -> String {
                 self.to_value().to_string()
             }
@@ -214,9 +227,11 @@ pub fn to_json_derive(input: TokenStream) -> TokenStream {
 pub fn to_yaml_derive(input: TokenStream) -> TokenStream {
     let input = parse_macro_input!(input as DeriveInput);
     let name = input.ident;
+    let generics = input.generics;
+    let (impl_generics, ty_generics, where_clause) = generics.split_for_impl();
 
     let expanded = quote! {
-        impl ToYamlBehavior for #name {
+        impl #impl_generics ToYamlBehavior for #name  #ty_generics #where_clause {
             fn to_yaml(&self) -> String {
                 let value = self.to_value();
                 value.to_yaml()

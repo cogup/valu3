@@ -928,6 +928,8 @@ where
     }
 }
 
+//TODO: implement [(K, V)] and [(K, Value)]
+
 #[cfg(test)]
 mod tests {
     use crate::prelude::*;
