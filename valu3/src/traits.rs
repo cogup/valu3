@@ -159,6 +159,30 @@ impl FromValueBehavior for f64 {
     }
 }
 
+impl FromValueBehavior for &str {
+    type Item = String;
+
+    fn from_value(value: Value) -> Option<Self::Item> {
+        if let Value::String(string_b) = value {
+            Some(string_b.as_string())
+        } else {
+            None
+        }
+    }
+}
+
+impl FromValueBehavior for str {
+    type Item = String;
+
+    fn from_value(value: Value) -> Option<Self::Item> {
+        if let Value::String(string_b) = value {
+            Some(string_b.as_string())
+        } else {
+            None
+        }
+    }
+}
+
 #[cfg(feature = "cstring")]
 impl FromValueBehavior for String {
     type Item = String;
