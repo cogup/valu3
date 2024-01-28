@@ -152,6 +152,12 @@ impl ToValueBehavior for u64 {
     }
 }
 
+impl ToValueBehavior for u128 {
+    fn to_value(&self) -> Value {
+        Value::Number(Number::from(*self))
+    }
+}
+
 impl ToValueBehavior for i8 {
     fn to_value(&self) -> Value {
         Value::Number(Number::from(*self))
@@ -171,6 +177,12 @@ impl ToValueBehavior for i32 {
 }
 
 impl ToValueBehavior for i64 {
+    fn to_value(&self) -> Value {
+        Value::Number(Number::from(*self))
+    }
+}
+
+impl ToValueBehavior for i128 {
     fn to_value(&self) -> Value {
         Value::Number(Number::from(*self))
     }

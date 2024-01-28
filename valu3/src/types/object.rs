@@ -31,7 +31,7 @@ impl PartialOrd for Object {
     fn partial_cmp(&self, other: &Self) -> Option<std::cmp::Ordering> {
         match (self, other) {
             (Object::BTreeMap(map1), Object::BTreeMap(map2)) => map1.partial_cmp(map2),
-            (Object::HashMap(map1), Object::HashMap(map2)) => None,
+            (Object::HashMap(_), Object::HashMap(_)) => None,
             _ => None,
         }
     }
