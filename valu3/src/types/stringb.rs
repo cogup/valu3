@@ -3,7 +3,6 @@
 //! This implementation offers a way to handle strings with additional features, such as converting
 //! the string to uppercase or lowercase, trimming, replacing, and concatenating. It also handles
 //! converting between different representations of strings, such as `CString`, `String`, and `Vec<u8>`.
-use crate::prelude::*;
 use std::fmt::{Display, Formatter};
 use std::ops::Deref;
 

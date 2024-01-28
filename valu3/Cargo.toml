@@ -1,8 +1,8 @@
 [package]
 name = "valu3"
-version = "0.3.6"
+version = "0.3.7"
 edition = "2021"
-license = "MIT OR Apache-2.0"
+license = "MIT"
 readme = "crates-io.md"
 authors = ["Philippe Assis <codephilippe@gmail.com>"]
 repository = "https://github.com/purp-lang/valu3"
@@ -12,11 +12,11 @@ categories = ["encoding", "no-std"]
 documentation = "https://docs.rs/valu3"
 
 [dependencies]
-pest="2.5.7"
+pest="2.7.6"
 pest_derive="2.5.7"
-regex = "1.7.3"
-chrono = "0.4.24"
-serde = { version = "1.0.159", features = ["derive"], optional = true }
+regex = "1.10.3"
+chrono = "0.4.33"
+serde = { version = "1.0.196", features = ["derive"], optional = true }
 valu3-derive = { path = "../valu3_derive", optional = true, version="0.2.1" }
 
 [features]

@@ -442,6 +442,6 @@ impl ValueKeyBehavior for usize {
 }
 impl ValueKeyBehavior for &str {
     fn to_value_key(&self) -> ValueKey {
-        ValueKey::String(StringB::from(self.clone()))
+        ValueKey::String(StringB::from(*self))
     }
 }
