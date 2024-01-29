@@ -1,6 +1,6 @@
 [package]
 name = "valu3-derive"
-version = "0.3.8"
+version = "0.3.9"
 edition = "2021"
 license = "MIT"
 readme = "crates-io.md"
