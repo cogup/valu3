@@ -12,10 +12,6 @@ Welcome to **Valu3** - the ultimate, flexible, and powerful library for manipula
 [![codecov](https://codecov.io/gh/purp-lang/valu3/branch/master/graph/badge.svg)](https://codecov.io/gh/purp-lang/valu3)
 ![downloads](https://img.shields.io/crates/d/valu3.svg)
 
-## 🔥 Motivation
-
-Valu3 was initially created to support the development of **Purp Lang**, a cutting-edge programming language focused on workflow pipeline development. Purp Lang is still under active development and will be unveiled soon. By leveraging the power of Valu3, Purp Lang promises to revolutionize the way developers create and manage workflow pipelines.
-
 ## 🌟 Key Features
 
 1. **Universal Type Handling**: No more juggling with different data types! Valu3's generic type support enables smooth management of all data types under one roof.
@@ -149,7 +145,7 @@ If you would like to contribute to the project, please feel free to submit a pul
 
 We're constantly working to improve and expand the capabilities of Valu3, making it even more powerful and versatile. Stay updated on the upcoming features and enhancements by visiting our project board on GitHub:
 
-🔗 [Purp Lang Project Board on GitHub](https://github.com/orgs/purp-lang/projects/1/settings)
+🔗 [Purp Project Board on GitHub](https://github.com/orgs/purp-lang/projects/1/settings)
 
 By keeping track of the project's progress, you can stay informed about new features in development and planned improvements. This will allow you to make the most of Valu3 in your Rust projects and prepare for future updates.
 
