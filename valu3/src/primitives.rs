@@ -39,6 +39,8 @@ impl PrimitiveType for u32 {}
 
 impl PrimitiveType for u64 {}
 
+impl PrimitiveType for u128 {}
+
 impl PrimitiveType for i8 {}
 
 impl PrimitiveType for i16 {}
@@ -46,6 +48,8 @@ impl PrimitiveType for i16 {}
 impl PrimitiveType for i32 {}
 
 impl PrimitiveType for i64 {}
+
+impl PrimitiveType for i128 {}
 
 impl PrimitiveType for f32 {}
 
