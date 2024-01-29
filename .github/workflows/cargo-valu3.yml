@@ -19,4 +19,10 @@ jobs:
       - uses: actions-rs/cargo@v1
         with:
           command: publish
+          args: --verbose -p valu3-derive
+
+
+      - uses: actions-rs/cargo@v1
+        with:
+          command: publish
           args: --verbose -p valu3
