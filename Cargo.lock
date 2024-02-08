@@ -357,7 +357,7 @@ checksum = "22049a19f4a68748a168c0fc439f9516686aa045927ff767eca0a85101fb6e73"
 
 [[package]]
 name = "valu3"
-version = "0.3.11"
+version = "0.3.12"
 dependencies = [
  "chrono",
  "pest",

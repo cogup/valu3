@@ -204,13 +204,21 @@ impl DateTimeBehavior for DateTime {
     fn timestamp(&self) -> Option<i64> {
         match self {
             DateTime::DateTime(datetime) => Some(datetime.timestamp()),
+            DateTime::Date(date) => Some(date.and_hms_opt(0, 0, 0).unwrap().timestamp()),
+            DateTime::Time(time) => Some(
+                NaiveDate::from_ymd_opt(1970, 1, 1)
+                    .unwrap()
+                    .and_hms_opt(time.hour(), time.minute(), time.second())
+                    .unwrap()
+                    .timestamp(),
+            ),
             _ => None,
         }
     }
 
     fn timezone(&self) -> Option<Utc> {
         match self {
-            DateTime::DateTime(_) => Some(Utc),
+            DateTime::DateTime(datetime) => Some(datetime.timezone()),
             _ => None,
         }
     }
@@ -341,5 +349,20 @@ mod tests {
             dt_datetime1.duration_between(&dt_datetime2),
             Some(Duration::days(1))
         );
+    }
+
+    #[test]
+    fn test_timestamp() {
+        let date = NaiveDate::from_ymd_opt(2023, 4, 5).unwrap();
+        let datetime = Utc.with_ymd_and_hms(2023, 4, 5, 12, 34, 56);
+
+        let dt_date = DateTime::from(date);
+        let dt_datetime = DateTime::from(datetime);
+
+        assert_eq!(
+            dt_date.timestamp(),
+            Some(date.and_hms_opt(0, 0, 0).unwrap().timestamp())
+        );
+        assert_eq!(dt_datetime.timestamp(), Some(datetime.unwrap().timestamp()));
     }
 }
