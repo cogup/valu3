@@ -17,7 +17,7 @@ pest_derive="2.5.7"
 regex = "1.10.3"
 chrono = "0.4.33"
 serde = { version = "1.0.196", features = ["derive"], optional = true }
-valu3-derive = { path = "../valu3_derive", optional = true, version="0.3.11" }
+valu3-derive = { path = "../valu3_derive", optional = true, version="0.3.12" }
 
 [features]
 default = ["parser", "derive"]
