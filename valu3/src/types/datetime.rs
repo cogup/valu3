@@ -56,6 +56,7 @@ pub enum DateTime {
     DateTime(ChDateTime<chrono::Utc>),
 }
 
+
 // Implementations of From trait to allow conversion from NaiveDate, NaiveTime, and ChDateTime<Utc>
 impl From<NaiveDate> for DateTime {
     fn from(value: NaiveDate) -> Self {
@@ -116,6 +117,16 @@ impl From<&str> for DateTime {
                 },
             },
         }
+    }
+}
+
+// Implementation of From trait to allow conversion from i64
+impl From<i64> for DateTime {
+    fn from(value: i64) -> Self {
+        DateTime::DateTime(ChDateTime::from_utc(
+            chrono::NaiveDateTime::from_timestamp(value, 0),
+            Utc,
+        ))
     }
 }
 
@@ -364,5 +375,33 @@ mod tests {
             Some(date.and_hms_opt(0, 0, 0).unwrap().timestamp())
         );
         assert_eq!(dt_datetime.timestamp(), Some(datetime.unwrap().timestamp()));
+    }
+
+    #[test]
+    fn test_timezone() {
+        let datetime = Utc.with_ymd_and_hms(2023, 4, 5, 12, 34, 56);
+        let dt_datetime = DateTime::from(datetime);
+
+        assert_eq!(dt_datetime.timezone(), Some(Utc));
+    }
+
+    #[test]
+    fn test_to_iso8601() {
+        let date = NaiveDate::from_ymd_opt(2023, 4, 5).unwrap();
+        let datetime = Utc.with_ymd_and_hms(2023, 4, 5, 12, 34, 56);
+
+        let dt_date = DateTime::from(date);
+        let dt_datetime = DateTime::from(datetime);
+
+        assert_eq!(dt_date.to_iso8601(), "2023-04-05");
+        assert_eq!(dt_datetime.to_iso8601(), "2023-04-05T12:34:56");
+    }
+
+    #[test]
+    fn test_from_i64() {
+        let timestamp = 1672532096;
+        let dt = DateTime::from(timestamp);
+
+        assert_eq!(dt.timestamp(), Some(timestamp));
     }
 }
