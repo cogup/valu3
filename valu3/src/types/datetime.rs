@@ -123,8 +123,8 @@ impl From<&str> for DateTime {
 // Implementation of From trait to allow conversion from i64
 impl From<i64> for DateTime {
     fn from(value: i64) -> Self {
-        DateTime::DateTime(ChDateTime::from_utc(
-            chrono::NaiveDateTime::from_timestamp(value, 0),
+        DateTime::DateTime(ChDateTime::from_naive_utc_and_offset(
+            chrono::NaiveDateTime::from_timestamp_opt(value, 0).unwrap(),
             Utc,
         ))
     }
