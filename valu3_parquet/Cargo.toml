@@ -14,7 +14,7 @@ documentation = "https://docs.rs/valu3-parquet"
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]
-valu3 = { path = "../valu3" }
+valu3 = { path = "../valu3", version = "0.4.0"}
 parquet = "50.0.0"
 arrow = "50.0.0"
 prettytable = { version = "0.10.0", optional = true }
