@@ -1,74 +1,13 @@
-//! # Apache Arrow Parquet Integration with Valu3
-//!
-//! This library provides an integration layer between Apache Arrow's Parquet format and the `valu3` library, 
-//! facilitating seamless data manipulation and transformation between Parquet files and `valu3`'s flexible `Value` structures. 
-//! It offers convenient methods for working with tabular data, allowing for easy conversions and operations on datasets.
-//!
-//! ## Examples
-//!
-//! ### Case 1
-//!
-//! ```
-//! use valu3_parket::Table;
-//!
-//! let mut table = Table::new();
-//! table.add("id", vec![1, 2, 3]);
-//! table.add("name", vec!["Alice", "Bob", "Charlie"]);
-//!
-//! assert_eq!(table.count_rows(), 3);
-//! ```
-//!
-//! ### Case 2
-//!
-//! ```
-//! use valu3_parket::Table;
-//!
-//! let mut table = Table::new();
-//! table.add("id", vec![1, 2, 3]);
-//! table.add("name", vec!["Alice", "Bob", "Charlie"]);
-//! table.add("score", vec![85.0, 92.5, 78.3]);
-//!
-//! // Access individual values
-//! let name = table.get_value(1, 0).unwrap();
-//!
-//! assert_eq!(name.to_string(), "Bob");
-//! ```
-//!
-//! ### Case 3
-//!
-//! ```
-//! use valu3_parket::Table;
-//!
-//! let mut table = Table::new();
-//! table.add("id", vec![1, 2, 3]);
-//! table.add("name", vec!["Alice", "Bob", "Charlie"]);
-//! table.add("score", vec![85.0, 92.5, 78.3]);
-//!
-//! // Convert table to Parquet file
-//! table.to_parquet("data.parquet").expect("Failed to write Parquet file");
-//!
-//! // Read Parquet file back into a table
-//! let new_table = Table::from_parquet("data.parquet").expect("Failed to read Parquet file");
-//!
-//! // Perform operations on the new table
-//! assert_eq!(table.get_headers(), new_table.get_headers());
-//! assert_eq!(table.get_cols(), new_table.get_cols());
-//! ```
-mod froms;
-mod table_record_batch;
 use std::collections::HashMap;
-use std::vec;
 use valu3::prelude::*;
-use prettytable::{Cell, Row, Table as PrettyTable};
-pub use froms::*;
-pub use table_record_batch::*;
+use crate::*;
 
 /// Represents a table with headers and columns of values.
 #[derive(Debug, Clone)]
 pub struct Table {
-    headers: Vec<String>,
-    cols: Vec<Vec<Value>>,
-    record_batch: Option<TableRecordBatch>,
+    pub(crate) headers: Vec<String>,
+    pub(crate) cols: Vec<Vec<Value>>,
+    pub(crate) record_batch: Option<TableRecordBatch>,
 }
 
 impl Table {
@@ -77,14 +16,14 @@ impl Table {
     /// # Examples
     ///
     /// ```
-    /// use valu3_parket::Table;
+    /// use valu3_parquet::Table;
     ///
     /// let table = Table::new();
     /// ```
     pub fn new() -> Self {
         Self {
-            headers: vec![],
-            cols: vec![],
+            headers: Vec::new(),
+            cols: Vec::new(),
             record_batch: None,
         }
     }
@@ -94,7 +33,7 @@ impl Table {
     /// # Examples
     ///
     /// ```
-    /// use valu3_parket::Table;
+    /// use valu3_parquet::Table;
     ///
     /// let mut table = Table::new();
     /// assert_eq!(table.count_rows(), 0);
@@ -111,7 +50,7 @@ impl Table {
     /// # Examples
     /// 
     /// ```
-    /// use valu3_parket::Table;
+    /// use valu3_parquet::Table;
     /// 
     /// let mut table = Table::new();
     /// assert_eq!(table.count_cols(), 0);
@@ -125,10 +64,10 @@ impl Table {
     /// # Examples
     /// 
     /// ```
-    /// use valu3_parket::Table;
+    /// use valu3_parquet::Table;
     /// 
     /// let mut table = Table::new();
-    /// table.add_col_to_header("id", vec![1, 2, 3]);
+    /// table.add_col_to_header("id", vec_value![1, 2, 3]);
     /// ```
     pub fn add_col_to_header(&mut self, header: &str, col: Vec<Value>) {
         let index = self.add_header(header);
@@ -141,10 +80,10 @@ impl Table {
     /// # Examples
     /// 
     /// ```
-    /// use valu3_parket::Table;
+    /// use valu3_parquet::Table;
     /// 
     /// let mut table = Table::new();
-    /// table.add_col_to_header_index(0, vec![1, 2, 3]);
+    /// table.add_col_to_header_index(0, vec_value![1, 2, 3]);
     /// ```
     pub fn add_col_to_header_index(&mut self, header_index: usize, col: Vec<Value>) {
         match self.cols.get_mut(header_index) {
@@ -160,7 +99,7 @@ impl Table {
     /// # Examples
     /// 
     /// ```
-    /// use valu3_parket::Table;
+    /// use valu3_parquet::Table;
     /// 
     /// let mut table = Table::new();
     /// table.push_item(0, 1.to_value());
@@ -174,7 +113,7 @@ impl Table {
     /// # Examples
     /// 
     /// ```
-    /// use valu3_parket::Table;
+    /// use valu3_parquet::Table;
     /// 
     /// let mut table = Table::new();
     /// table.push_item_in_header("id", 1.to_value());
@@ -195,7 +134,7 @@ impl Table {
     /// # Examples
     /// 
     /// ```
-    /// use valu3_parket::Table;
+    /// use valu3_parquet::Table;
     /// 
     /// let mut table = Table::new();
     /// table.add_header("id");
@@ -209,7 +148,7 @@ impl Table {
     /// # Examples
     /// 
     /// ```
-    /// use valu3_parket::Table;
+    /// use valu3_parquet::Table;
     /// 
     /// let mut table = Table::new();
     /// table.add_header_string("id".to_string());
@@ -224,7 +163,7 @@ impl Table {
     /// # Examples
     /// 
     /// ```
-    /// use valu3_parket::Table;
+    /// use valu3_parquet::Table;
     /// 
     /// let mut table = Table::new();
     /// table.change_value(0, 0, 1.to_value());
@@ -238,14 +177,22 @@ impl Table {
     /// # Examples
     /// 
     /// ```
-    /// use valu3_parket::Table;
+    /// use valu3_parquet::Table;
     /// 
     /// let mut table = Table::new();
-    /// table.add("id", vec![1, 2, 3]);
+    /// table.add("id", vec_value![1, 2, 3]);
     /// ```
     pub fn add(&mut self, header: &str, value: Vec<Value>) {
         self.add_header(header);
         self.add_col(value);
+    }
+
+    pub fn extend(&mut self, table: &Table) {
+        for (index, header) in table.headers.iter().enumerate() {
+            let col = table.get_col(index).unwrap().clone();
+
+            self.add(header, col);
+        }
     }
 
     /// Retrieves the header at the specified index.
@@ -253,7 +200,7 @@ impl Table {
     /// # Examples
     /// 
     /// ```
-    /// use valu3_parket::Table;
+    /// use valu3_parquet::Table;
     /// 
     /// let mut table = Table::new();
     /// table.add_header("id");
@@ -268,7 +215,7 @@ impl Table {
     /// # Examples
     /// 
     /// ```
-    /// use valu3_parket::Table;
+    /// use valu3_parquet::Table;
     /// 
     /// let mut table = Table::new();
     /// table.add_header("id");
@@ -283,14 +230,29 @@ impl Table {
     /// # Examples
     /// 
     /// ```
-    /// use valu3_parket::Table;
+    /// use valu3_parquet::Table;
     /// 
     /// let mut table = Table::new();
-    /// table.add("id", vec![1, 2, 3]);
-    /// assert_eq!(table.get_cols(), &vec![vec![1.to_value(), 2.to_value(), 3.to_value()]]);
+    /// table.add("id", vec_value![1, 2, 3]);
+    /// assert_eq!(table.get_cols(), &vec![vec_value![1, 2, 3]]);
     /// ```
     pub fn get_cols(&self) -> &Vec<Vec<Value>> {
         &self.cols
+    }
+
+    /// Retrieves the record batch associated with the table.
+    /// 
+    /// # Examples
+    /// 
+    /// ```
+    /// use valu3_parquet::Table;
+    /// 
+    /// let mut table = Table::new();
+    /// table.load_record_batch().unwrap();
+    /// assert!(table.get_batch_record().is_some());
+    /// ```
+    pub fn get_col(&self, index: usize) -> Option<&Vec<Value>> {
+        self.cols.get(index)
     }
 
     /// Retrieves the value at the specified row and column indices.
@@ -298,41 +260,14 @@ impl Table {
     /// # Examples
     /// 
     /// ```
-    /// use valu3_parket::Table;
+    /// use valu3_parquet::Table;
     /// 
     /// let mut table = Table::new();
-    /// table.add("id", vec![1, 2, 3]);
+    /// table.add("id", vec_value![1, 2, 3]);
     /// assert_eq!(table.get_value(0, 0).unwrap(), &1.to_value());
     /// ```
     pub fn get_value(&self, col: usize, row: usize) -> Option<&Value> {
         self.cols.get(col)?.get(row)
-    }
-
-    /// Prints the table in a human-readable format.
-    /// 
-    /// # Examples
-    /// 
-    /// ```
-    /// use valu3_parket::Table;
-    /// 
-    /// let mut table = Table::new();
-    /// table.add("id", vec![1, 2, 3]);
-    /// table.print_table();
-    /// ```
-    pub fn print_table(&self) {
-        let mut table = PrettyTable::new();
-
-        table.add_row(Row::new(
-            self.headers.iter().map(|x| Cell::new(x)).collect(),
-        ));
-
-        for col in &self.cols {
-            table.add_row(Row::new(
-                col.iter().map(|x| Cell::new(&x.to_string())).collect(),
-            ));
-        }
-
-        table.printstd();
     }
 
     /// Converts the table to a HashMap representation.
@@ -340,13 +275,13 @@ impl Table {
     /// # Examples
     /// 
     /// ```
-    /// use valu3_parket::Table;
+    /// use valu3_parquet::Table;
     /// 
     /// let mut table = Table::new();
-    /// table.add("id", vec![1, 2, 3]);
-    /// table.add("name", vec!["Alice", "Bob", "Charlie"]);
-    /// table.add("score", vec![85.0, 92.5, 78.3]);
-    /// table.add("active", vec![true, false, true]);
+    /// table.add("id", vec_value![1, 2, 3]);
+    /// table.add("name", vec_value!["Alice", "Bob", "Charlie"]);
+    /// table.add("score", vec_value![85.0, 92.5, 78.3]);
+    /// table.add("active", vec_value![true, false, true]);
     /// table.to_map();
     /// ```
     pub fn to_map(&self) -> HashMap<String, Vec<Value>> {
@@ -384,7 +319,7 @@ mod tests {
         table.add("active", vec_value![true, false, true]);
         table.add("amount", vec_value![100.0, 150.0, 200.0]);
 
-        table.load_record_batch();
+        table.load_record_batch().unwrap();
 
         let batch = table.get_batch_record().unwrap();
 

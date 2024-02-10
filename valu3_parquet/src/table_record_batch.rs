@@ -1,6 +1,8 @@
 use arrow::array::{Array, BooleanArray, Float64Array, Int32Array, StringArray};
 use arrow::datatypes::{DataType, Field, Schema};
 use arrow::record_batch::RecordBatch;
+use parquet::arrow::arrow_reader::ParquetRecordBatchReaderBuilder;
+use std::fs::File;
 use std::sync::Arc;
 use std::vec;
 use valu3::prelude::*;
@@ -14,6 +16,8 @@ pub enum TableRecordBatchError {
     WriteParquet(String),
     CloseParquet(String),
     IO(std::io::Error),
+    ParquetRead(parquet::errors::ParquetError),
+    ArrowError(arrow::error::ArrowError),
     RecordNotFound,
 }
 
@@ -317,6 +321,32 @@ impl Table {
         }
     }
 
+    pub fn from_parquet(file_path: &str) -> Result<Self, TableRecordBatchError> {
+        let file = match File::open(file_path) {
+            Ok(file) => file,
+            Err(error) => return Err(TableRecordBatchError::IO(error)),
+        };
+
+        let parquet_reader = match ParquetRecordBatchReaderBuilder::try_new(file) {
+            Ok(parquet_reader) => match parquet_reader.with_batch_size(8192).build() {
+                Ok(parquet_reader) => parquet_reader,
+                Err(error) => return Err(TableRecordBatchError::ParquetRead(error)),
+            },
+            Err(error) => return Err(TableRecordBatchError::ParquetRead(error)),
+        };
+
+        let mut batches: Vec<RecordBatch> = Vec::new();
+
+        for batch in parquet_reader {
+            batches.push(match batch {
+                Ok(batch) => batch,
+                Err(error) => return Err(TableRecordBatchError::ArrowError(error)),
+            });
+        }
+
+        Ok(Self::from(&batches))
+    }
+
     pub fn get_batch_record(&mut self) -> Result<&RecordBatch, &TableRecordBatchError> {
         match &self.record_batch {
             Some(record_batch) => Ok(record_batch.record_batch()),
@@ -329,5 +359,76 @@ impl Table {
             Some(record_batch) => Ok(record_batch.schema()),
             None => Err(TableRecordBatchError::RecordNotFound),
         }
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use valu3::vec_value;
+
+    #[test]
+    fn test_table_record_batch() {
+        let mut table = Table::new();
+        table.add("id", vec_value![1, 2, 3]);
+        table.add("name", vec_value!["Alice", "Bob", "Charlie"]);
+
+        let record_batch = TableRecordBatch::build(&table).unwrap();
+
+        assert_eq!(record_batch.schema().fields().len(), 2);
+        assert_eq!(record_batch.schema().field(0).name(), "id");
+        assert_eq!(record_batch.schema().field(1).name(), "name");
+
+        let record_batch = record_batch.record_batch();
+
+        assert_eq!(record_batch.num_columns(), 2);
+        assert_eq!(record_batch.num_rows(), 3);
+
+        let id = record_batch.column(0);
+        let name = record_batch.column(1);
+
+        assert_eq!(id.len(), 3);
+        assert_eq!(name.len(), 3);
+
+        let id = id.as_any().downcast_ref::<Int32Array>().unwrap();
+        let name = name.as_any().downcast_ref::<StringArray>().unwrap();
+
+        assert_eq!(id.value(0), 1);
+        assert_eq!(id.value(1), 2);
+        assert_eq!(id.value(2), 3);
+
+        assert_eq!(name.value(0), "Alice");
+        assert_eq!(name.value(1), "Bob");
+        assert_eq!(name.value(2), "Charlie");
+    }
+
+    #[test]
+    fn test_table_record_batch_parquet() {
+        let mut table = Table::new();
+        table.add("id", vec_value![1, 2, 3]);
+        table.add("name", vec_value!["Alice", "Bob", "Charlie"]);
+
+        table.load_record_batch().unwrap();
+
+        let file_path = "test_table_record_batch_parquet.parquet";
+
+        assert!(table.to_parquet(file_path).is_ok());
+
+        let table = Table::from_parquet(file_path).unwrap();
+
+        assert_eq!(
+            table.get_headers(),
+            &vec!["id".to_string(), "name".to_string()]
+        );
+
+        assert_eq!(
+            table.get_cols(),
+            &vec![
+                vec_value![1, 2, 3],
+                vec_value!["Alice", "Bob", "Charlie"]
+            ]
+        );
+
+        std::fs::remove_file(file_path).unwrap();
     }
 }

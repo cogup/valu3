@@ -203,7 +203,7 @@ impl ToValueBehavior for f64 {
 /// Set to_value all items in a vector
 /// # Example
 /// ```
-/// use valu3_parket::vec_value;
+/// use valu3_parquet::vec_value;
 /// use valu3::Value;
 /// let vec = vec_value![1, 2, 3];
 ///

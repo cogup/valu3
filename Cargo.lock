@@ -1225,7 +1225,7 @@ dependencies = [
 ]
 
 [[package]]
-name = "valu3_parket"
+name = "valu3_parquet"
 version = "0.1.0"
 dependencies = [
  "arrow",

@@ -4,7 +4,7 @@ use arrow::record_batch::RecordBatch;
 use std::sync::Arc;
 use valu3::prelude::*;
 
-use crate::Table;
+use crate::*;
 
 macro_rules! array_to_value {
     ($array:ident, $row:ident) => {
@@ -187,10 +187,7 @@ impl From<&Vec<RecordBatch>> for Table {
         let mut table = Self::new();
 
         for batch in batches {
-            let mut batch_table = Table::from(batch);
-
-            table.headers.append(&mut batch_table.headers);
-            table.cols.append(&mut batch_table.cols);
+            table.extend(&Table::from(batch));
         }
 
         table
