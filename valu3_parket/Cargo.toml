@@ -1,0 +1,12 @@
+[package]
+name = "valu3_parket"
+version = "0.1.0"
+edition = "2021"
+
+# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+
+[dependencies]
+valu3 = { path = "../valu3" }
+parquet = "50.0.0"
+arrow = "50.0.0"
+prettytable = "0.10.0"

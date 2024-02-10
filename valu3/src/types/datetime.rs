@@ -124,7 +124,7 @@ impl From<&str> for DateTime {
 impl From<i64> for DateTime {
     fn from(value: i64) -> Self {
         DateTime::DateTime(ChDateTime::from_naive_utc_and_offset(
-            chrono::NaiveDateTime::from_timestamp_opt(value, 0).unwrap(),
+            chrono::NaiveDateTime::from_timestamp_nanos(value).unwrap(),
             Utc,
         ))
     }
@@ -399,9 +399,12 @@ mod tests {
 
     #[test]
     fn test_from_i64() {
-        let timestamp = 1672532096;
-        let dt = DateTime::from(timestamp);
+        let timestamp_nanos = 1672539296000000000;
+        let dt_datetime = DateTime::from(timestamp_nanos);
 
-        assert_eq!(dt.timestamp(), Some(timestamp));
+        assert_eq!(
+            dt_datetime,
+            DateTime::from(Utc.timestamp_nanos(timestamp_nanos))
+        );
     }
 }

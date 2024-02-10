@@ -2,5 +2,6 @@
 members = [
     "valu3",
     "valu3_derive",
+    "valu3_parket"
 ]
 resolver = "2"

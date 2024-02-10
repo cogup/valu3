@@ -200,6 +200,22 @@ impl ToValueBehavior for f64 {
     }
 }
 
+/// Set to_value all items in a vector
+/// # Example
+/// ```
+/// use valu3_parket::vec_value;
+/// use valu3::Value;
+/// let vec = vec_value![1, 2, 3];
+///
+/// assert_eq!(vec, vec![Value::Number(1), Value::Number(2), Value::Number(3)]);
+/// ```
+#[macro_export]
+macro_rules! vec_value {
+    ($($x:expr),*) => {
+        vec![$($x.to_value()),*]
+    };
+}
+
 #[cfg(test)]
 mod test {
     use std::collections::HashMap;
@@ -233,5 +249,13 @@ mod test {
         let mut map = HashMap::new();
         map.insert("test", 1);
         assert_eq!(map.to_value(), Object::from(map).to_value());
+    }
+
+    #[test]
+    fn test_vec_value_macro() {
+        assert_eq!(
+            vec_value![1, 2, vec![1, 2, 3]],
+            vec![Value::from(1), Value::from(2), Value::from(vec![1, 2, 3])]
+        );
     }
 }
