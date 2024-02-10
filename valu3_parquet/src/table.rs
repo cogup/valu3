@@ -3,7 +3,7 @@ use valu3::prelude::*;
 use crate::*;
 
 /// Represents a table with headers and columns of values.
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, Default)]
 pub struct Table {
     pub(crate) headers: Vec<String>,
     pub(crate) cols: Vec<Vec<Value>>,
