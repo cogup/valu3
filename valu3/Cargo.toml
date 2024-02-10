@@ -18,7 +18,7 @@ regex = "1.10.3"
 chrono = "0.4.33"
 serde = { version = "1.0.196", features = ["derive"], optional = true }
 valu3-derive = { path = "../valu3_derive", optional = true }
-valu3-parquet = { path = "../value_parquet", optional = true }
+valu3-parquet = { path = "../valu3_parquet", optional = true }
 
 [features]
 default = ["parser", "derive"]

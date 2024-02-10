@@ -20,4 +20,4 @@ jobs:
       - uses: cogup/cargo@master
         with:
           command: publish
-          args: --verbose -p valu3-parket
+          args: --verbose -p valu3-parquet
