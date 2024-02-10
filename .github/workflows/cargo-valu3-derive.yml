@@ -1,11 +1,11 @@
-name: Cargo Publish Valu3
+name: Cargo Publish Valu3 Derive
 
 on:
   push:
     tags:
       - '*'
     paths:
-      - "valu3-derive/**"
+      - "valu3_derive/**"
 
 env:
   CARGO_REGISTRY_TOKEN: ${{ secrets.CARGO_REGISTRY_TOKEN }}

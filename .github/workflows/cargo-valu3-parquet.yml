@@ -1,11 +1,11 @@
-name: Cargo Publish Valu3
+name: Cargo Publish Valu3 Parquet
 
 on:
   push:
     tags:
       - '*'
     paths:
-      - "valu3-parquet/**"
+      - "valu3_parquet/**"
 
 env:
   CARGO_REGISTRY_TOKEN: ${{ secrets.CARGO_REGISTRY_TOKEN }}
