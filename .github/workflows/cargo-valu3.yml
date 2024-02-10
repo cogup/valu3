@@ -22,14 +22,14 @@ jobs:
           args: --verbose -p valu3-derive
 
       - uses: cogup/cargo@master
-        name: Publish Valu3
-        with:
-          command: publish
-          args: --verbose -p valu3
-
-      - uses: cogup/cargo@master
         name: Publish Valu3 Parquet
         with:
           command: publish
           args: --verbose -p valu3-parquet
+  
+      - uses: cogup/cargo@master
+        name: Publish Valu3
+        with:
+          command: publish
+          args: --verbose -p valu3
   
