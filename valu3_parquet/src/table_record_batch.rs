@@ -1,3 +1,39 @@
+///! This module provides the TableRecordBatch struct, which is a wrapper around the Arrow RecordBatch.
+///! It also provides methods to convert a Table to a TableRecordBatch and to write a TableRecordBatch to a Parquet file.
+///! It also provides methods to read a Parquet file and convert it to a Table.
+/// 
+///! Example:
+///! ```
+///! use valu3_parquet::Table;
+///! use valu3::vec_value;
+///! 
+///! let mut table = Table::new();
+///! table.add("id", vec_value![1, 2, 3]);
+///! table.add("name", vec_value!["Alice", "Bob", "Charlie"]);
+///! 
+///! table.load_record_batch().unwrap();
+///! 
+///! let file_path = "test_table_record_batch_parquet.parquet";
+///! 
+///! assert!(table.to_parquet(file_path).is_ok());
+///! 
+///! let table = Table::from_parquet(file_path).unwrap();
+///! 
+///! assert_eq!(
+///!    table.get_headers(),
+///!   &vec!["id".to_string(), "name".to_string()]
+///! );
+///! 
+///! assert_eq!(
+///!   table.get_cols(),
+///!  &vec![
+///!     vec_value![1, 2, 3],
+///!    vec_value!["Alice", "Bob", "Charlie"]
+///! ]
+///! );
+///! 
+///! std::fs::remove_file(file_path).unwrap();
+///! ``` 
 use arrow::array::{Array, BooleanArray, Float64Array, Int32Array, StringArray};
 use arrow::datatypes::{DataType, Field, Schema};
 use arrow::record_batch::RecordBatch;
@@ -11,13 +47,21 @@ use crate::Table;
 
 #[derive(Debug)]
 pub enum TableRecordBatchError {
+    /// Error creating record batch
     InvalidDataType(String),
+    /// Error creating record batch
     CreateRecordBatch(String),
+    /// Error writing record batch
     WriteParquet(String),
+    /// Error closing parquet
     CloseParquet(String),
+    /// Error reading parquet, writing parquet, or closing parquet
     IO(std::io::Error),
+    /// Error reading parquet
     ParquetRead(parquet::errors::ParquetError),
+    /// Error reading parquet
     ArrowError(arrow::error::ArrowError),
+    /// Record batch not found
     RecordNotFound,
 }
 
@@ -66,14 +110,17 @@ pub struct TableRecordBatch {
 }
 
 impl TableRecordBatch {
+    /// Create a new TableRecordBatch from a RecordBatch and a Schema
     pub fn record_batch(&self) -> &RecordBatch {
         &self.record_batch
     }
 
+    /// Create a new TableRecordBatch from a RecordBatch and a Schema
     pub fn schema(&self) -> &Arc<Schema> {
         &self.schema
     }
 
+    /// Create a new TableRecordBatch from a RecordBatch and a Schema
     pub fn build(value_table: &Table) -> Result<Self, TableRecordBatchError> {
         let mut schema_types: Vec<DataType> = Vec::new();
 
@@ -304,6 +351,20 @@ impl TableRecordBatch {
 }
 
 impl Table {
+    /// Load the TableRecordBatch from the Table
+    /// 
+    /// # Example
+    /// 
+    /// ```
+    /// use valu3_parquet::Table;
+    /// use valu3::vec_value;
+    /// 
+    /// let mut table = Table::new();
+    /// table.add("id", vec_value![1, 2, 3]);
+    /// table.add("name", vec_value!["Alice", "Bob", "Charlie"]);
+    /// 
+    /// table.load_record_batch().unwrap();
+    /// ```
     pub fn load_record_batch(&mut self) -> Result<(), TableRecordBatchError> {
         match TableRecordBatch::build(self) {
             Ok(table_record_batch) => {
@@ -314,6 +375,26 @@ impl Table {
         }
     }
 
+    /// Convert the Table to a Parquet file
+    /// 
+    /// # Example
+    /// 
+    /// ```
+    /// use valu3_parquet::Table;
+    /// use valu3::vec_value;
+    /// 
+    /// let mut table = Table::new();
+    /// table.add("id", vec_value![1, 2, 3]);
+    /// table.add("name", vec_value!["Alice", "Bob", "Charlie"]);
+    /// 
+    /// table.load_record_batch().unwrap();
+    /// 
+    /// let file_path = "test_table_record_batch_parquet.parquet";
+    /// 
+    /// assert!(table.to_parquet(file_path).is_ok());
+    /// 
+    /// std::fs::remove_file(file_path).unwrap();
+    /// ```
     pub fn to_parquet(&self, file_path: &str) -> Result<(), TableRecordBatchError> {
         match &self.record_batch {
             Some(record_batch) => record_batch.to_parquet_file(file_path),
@@ -321,6 +402,28 @@ impl Table {
         }
     }
 
+    /// Convert a Parquet file to a Table
+    /// 
+    /// # Example
+    /// 
+    /// ```
+    /// use valu3_parquet::Table;
+    /// 
+    /// let mut table = Table::from_parquet("test_table_record_batch_parquet.parquet").unwrap();
+    /// 
+    /// assert_eq!(
+    ///   table.get_headers(),
+    ///  &vec!["id".to_string(), "name".to_string()]
+    /// );
+    /// 
+    /// assert_eq!(
+    ///  table.get_cols(),
+    /// &vec![
+    ///   vec_value![1, 2, 3],
+    /// vec_value!["Alice", "Bob", "Charlie"]
+    /// ]
+    /// );
+    /// ```
     pub fn from_parquet(file_path: &str) -> Result<Self, TableRecordBatchError> {
         let file = match File::open(file_path) {
             Ok(file) => file,
@@ -347,6 +450,25 @@ impl Table {
         Ok(Self::from(&batches))
     }
 
+    /// Get the RecordBatch from the Table
+    /// 
+    /// # Example
+    /// 
+    /// ```
+    /// use valu3_parquet::Table;
+    /// use valu3::vec_value;
+    /// 
+    /// let mut table = Table::new();
+    /// table.add("id", vec_value![1, 2, 3]);
+    /// table.add("name", vec_value!["Alice", "Bob", "Charlie"]);
+    /// 
+    /// table.load_record_batch().unwrap();
+    /// 
+    /// let record_batch = table.get_batch_record().unwrap();
+    /// 
+    /// assert_eq!(record_batch.num_columns(), 2);
+    /// assert_eq!(record_batch.num_rows(), 3);
+    /// ```
     pub fn get_batch_record(&mut self) -> Result<&RecordBatch, &TableRecordBatchError> {
         match &self.record_batch {
             Some(record_batch) => Ok(record_batch.record_batch()),
@@ -354,6 +476,26 @@ impl Table {
         }
     }
 
+    /// Get the Schema from the Table
+    /// 
+    /// # Example
+    /// 
+    /// ```
+    /// use valu3_parquet::Table;
+    /// use valu3::vec_value;
+    /// 
+    /// let mut table = Table::new();
+    /// table.add("id", vec_value![1, 2, 3]);
+    /// table.add("name", vec_value!["Alice", "Bob", "Charlie"]);
+    /// 
+    /// table.load_record_batch().unwrap();
+    /// 
+    /// let schema = table.get_schema().unwrap();
+    /// 
+    /// assert_eq!(schema.fields().len(), 2);
+    /// assert_eq!(schema.field(0).name(), "id");
+    /// assert_eq!(schema.field(1).name(), "name");
+    /// ```
     pub fn get_schema(&self) -> Result<&Arc<Schema>, TableRecordBatchError> {
         match &self.record_batch {
             Some(record_batch) => Ok(record_batch.schema()),

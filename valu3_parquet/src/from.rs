@@ -1,3 +1,12 @@
+///! This module contains the implementation of the `From` trait for converting
+///! Arrow's `RecordBatch` and `Vec<RecordBatch>` into `Table` structures.
+///!
+///! The `From` trait is implemented for the following conversions:
+///! - `&RecordBatch` -> `Table`
+///! - `&Vec<RecordBatch>` -> `Table`
+///! 
+///! The `From` trait is used to convert a value of one type into a value of another type.
+///! It is a powerful tool for creating new abstractions and for interoperating with existing code.
 use arrow::array::{Array, Int32Array, StringArray};
 use arrow::datatypes::DataType;
 use arrow::record_batch::RecordBatch;
@@ -16,6 +25,7 @@ macro_rules! array_to_value {
     };
 }
 
+/// Convert a `RecordBatch` into a `Table`.
 impl From<&RecordBatch> for Table {
     fn from(batch: &RecordBatch) -> Self {
         let mut table = Self::new();
@@ -182,6 +192,7 @@ impl From<&RecordBatch> for Table {
     }
 }
 
+/// Convert a `Vec<RecordBatch>` into a `Table`.
 impl From<&Vec<RecordBatch>> for Table {
     fn from(batches: &Vec<RecordBatch>) -> Self {
         let mut table = Self::new();

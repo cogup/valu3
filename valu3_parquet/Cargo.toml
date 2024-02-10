@@ -1,7 +1,15 @@
 [package]
-name = "valu3_parquet"
-version = "0.3.14"
+name = "valu3-parquet"
+version = "0.4.0"
 edition = "2021"
+license = "MIT OR Apache-2.0"
+readme = "crates-io.md"
+authors = ["Philippe Assis <codephilippe@gmail.com>"]
+repository = "https://github.com/purp-project/valu3"
+keywords = ["value", "generic", "type", "serde", "any", "no-std", "parquet", "arrow", "encoding", "decoding", "serialization", "deserialization"]
+description = "Parquet and Arrow encoding and decoding for valu3"
+categories = ["encoding", "no-std", "parquet", "arrow", "serialization", "deserialization", "type", "generic", "value", "serde", "any"]
+documentation = "https://docs.rs/valu3-parquet"
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
