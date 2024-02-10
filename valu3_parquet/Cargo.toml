@@ -6,9 +6,9 @@ license = "MIT OR Apache-2.0"
 readme = "crates-io.md"
 authors = ["Philippe Assis <codephilippe@gmail.com>"]
 repository = "https://github.com/purp-project/valu3"
-keywords = ["value", "generic", "type", "serde", "any", "no-std", "parquet", "arrow", "encoding", "decoding", "serialization", "deserialization"]
+keywords = ["valu3", "generic", "apache", "arrow", "parquet"]
 description = "Parquet and Arrow encoding and decoding for valu3"
-categories = ["encoding", "no-std", "parquet", "arrow", "serialization", "deserialization", "type", "generic", "value", "serde", "any"]
+categories = ["encoding", "no-std", "parquet", "arrow", "valu3"]
 documentation = "https://docs.rs/valu3-parquet"
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
