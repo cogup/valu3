@@ -1,29 +1,29 @@
 ///! This module provides the TableRecordBatch struct, which is a wrapper around the Arrow RecordBatch.
 ///! It also provides methods to convert a Table to a TableRecordBatch and to write a TableRecordBatch to a Parquet file.
 ///! It also provides methods to read a Parquet file and convert it to a Table.
-/// 
+///
 ///! Example:
 ///! ```
 ///! use valu3_parquet::Table;
 ///! use valu3::vec_value;
-///! 
+///!
 ///! let mut table = Table::new();
 ///! table.add("id", vec_value![1, 2, 3]);
 ///! table.add("name", vec_value!["Alice", "Bob", "Charlie"]);
-///! 
-///! table.load_record_batch().unwrap();
-///! 
+///!
+///! table.load().unwrap();
+///!
 ///! let file_path = "test_table_record_batch_parquet.parquet";
-///! 
+///!
 ///! assert!(table.to_parquet(file_path).is_ok());
-///! 
+///!
 ///! let table = Table::from_parquet(file_path).unwrap();
-///! 
+///!
 ///! assert_eq!(
 ///!    table.get_headers(),
 ///!   &vec!["id".to_string(), "name".to_string()]
 ///! );
-///! 
+///!
 ///! assert_eq!(
 ///!   table.get_cols(),
 ///!  &vec![
@@ -31,9 +31,9 @@
 ///!    vec_value!["Alice", "Bob", "Charlie"]
 ///! ]
 ///! );
-///! 
+///!
 ///! std::fs::remove_file(file_path).unwrap();
-///! ``` 
+///! ```
 use arrow::array::{Array, BooleanArray, Float64Array, Int32Array, StringArray};
 use arrow::datatypes::{DataType, Field, Schema};
 use arrow::record_batch::RecordBatch;
@@ -63,6 +63,8 @@ pub enum TableRecordBatchError {
     ArrowError(arrow::error::ArrowError),
     /// Record batch not found
     RecordNotFound,
+    ToParquetBytes(parquet::errors::ParquetError),
+    ToBytes(std::string::FromUtf8Error),
 }
 
 macro_rules! value_get_i32 {
@@ -348,24 +350,56 @@ impl TableRecordBatch {
 
         Ok(())
     }
+
+    pub fn to_parquet_buffer(&self) -> Result<Vec<u8>, TableRecordBatchError> {
+        let mut buffer = Vec::new();
+
+        let mut writer =
+            match parquet::arrow::ArrowWriter::try_new(&mut buffer, self.schema.clone(), None) {
+                Ok(writer) => writer,
+                Err(error) => {
+                    return Err(TableRecordBatchError::CreateRecordBatch(format!(
+                        "Error creating record batch: {}",
+                        error
+                    )))
+                }
+            };
+
+        if let Err(err) = writer.write(&self.record_batch) {
+            return Err(TableRecordBatchError::WriteParquet(format!(
+                "Error writing record batch: {}",
+                err
+            )));
+        }
+
+        if let Err(err) = writer.close() {
+            return Err(TableRecordBatchError::CloseParquet(format!(
+                "Error closing parquet: {}",
+                err
+            )));
+        }
+
+        Ok(buffer)
+    }
 }
 
 impl Table {
     /// Load the TableRecordBatch from the Table
-    /// 
+    ///
     /// # Example
-    /// 
+    ///
     /// ```
     /// use valu3_parquet::Table;
     /// use valu3::vec_value;
-    /// 
+    /// use valu3::prelude::*;
+    ///
     /// let mut table = Table::new();
     /// table.add("id", vec_value![1, 2, 3]);
     /// table.add("name", vec_value!["Alice", "Bob", "Charlie"]);
-    /// 
-    /// table.load_record_batch().unwrap();
+    ///
+    /// table.load().unwrap();
     /// ```
-    pub fn load_record_batch(&mut self) -> Result<(), TableRecordBatchError> {
+    pub fn load(&mut self) -> Result<(), TableRecordBatchError> {
         match TableRecordBatch::build(self) {
             Ok(table_record_batch) => {
                 self.record_batch = Some(table_record_batch);
@@ -376,23 +410,24 @@ impl Table {
     }
 
     /// Convert the Table to a Parquet file
-    /// 
+    ///
     /// # Example
-    /// 
+    ///
     /// ```
     /// use valu3_parquet::Table;
     /// use valu3::vec_value;
-    /// 
+    /// use valu3::prelude::*;
+    ///
     /// let mut table = Table::new();
     /// table.add("id", vec_value![1, 2, 3]);
     /// table.add("name", vec_value!["Alice", "Bob", "Charlie"]);
-    /// 
-    /// table.load_record_batch().unwrap();
-    /// 
+    ///
+    /// table.load().unwrap();
+    ///
     /// let file_path = "test_table_record_batch_parquet.parquet";
-    /// 
+    ///
     /// assert!(table.to_parquet(file_path).is_ok());
-    /// 
+    ///
     /// std::fs::remove_file(file_path).unwrap();
     /// ```
     pub fn to_parquet(&self, file_path: &str) -> Result<(), TableRecordBatchError> {
@@ -402,20 +437,57 @@ impl Table {
         }
     }
 
-    /// Convert a Parquet file to a Table
-    /// 
+    /// Convert the Table to a byte array of a Parquet file
     /// # Example
-    /// 
     /// ```
     /// use valu3_parquet::Table;
+    /// use valu3::vec_value;
+    /// use valu3::prelude::*;
+    /// use parquet::arrow::arrow_reader::ParquetRecordBatchReader;
+    /// use bytes::Bytes;
+    ///
+    /// let mut table = Table::new();
+    ///
+    /// table.add("id", vec_value![1, 2, 3]);
+    /// table.add("name", vec_value!["Alice", "Bob", "Charlie"]);
+    /// table.load().unwrap();
+    ///
+    /// let buffer = table.to_parquet_buffer().unwrap();
+    ///
+    /// let mut reader = ParquetRecordBatchReader::try_new(Bytes::from(buffer), 1024).unwrap();
+    /// let read = reader.next().unwrap().unwrap();
+    ///
+    /// assert_eq!(table.get_batch_record().unwrap(), &read);
+    /// ```
+    pub fn to_parquet_buffer(&self) -> Result<Vec<u8>, TableRecordBatchError> {
+        match &self.record_batch {
+            Some(record_batch) => record_batch.to_parquet_buffer(),
+            None => Err(TableRecordBatchError::RecordNotFound),
+        }
+    }
+
+    /// Convert a Parquet file to a Table
+    ///
+    /// # Example
+    ///
+    /// ```
+    /// use valu3_parquet::Table;
+    /// use valu3::vec_value;
+    /// use valu3::prelude::*;
+    ///
+    /// let mut table = Table::new();
+    /// table.add("id", vec_value![1, 2, 3]);
+    /// table.add("name", vec_value!["Alice", "Bob", "Charlie"]);
+    /// table.load().unwrap();
+    /// table.to_parquet("test_table_record_batch_parquet.parquet").unwrap();
     /// 
     /// let mut table = Table::from_parquet("test_table_record_batch_parquet.parquet").unwrap();
-    /// 
+    ///
     /// assert_eq!(
     ///   table.get_headers(),
     ///  &vec!["id".to_string(), "name".to_string()]
     /// );
-    /// 
+    ///
     /// assert_eq!(
     ///  table.get_cols(),
     /// &vec![
@@ -451,21 +523,22 @@ impl Table {
     }
 
     /// Get the RecordBatch from the Table
-    /// 
+    ///
     /// # Example
-    /// 
+    ///
     /// ```
     /// use valu3_parquet::Table;
     /// use valu3::vec_value;
-    /// 
+    /// use valu3::prelude::*;
+    ///
     /// let mut table = Table::new();
     /// table.add("id", vec_value![1, 2, 3]);
     /// table.add("name", vec_value!["Alice", "Bob", "Charlie"]);
-    /// 
-    /// table.load_record_batch().unwrap();
-    /// 
+    ///
+    /// table.load().unwrap();
+    ///
     /// let record_batch = table.get_batch_record().unwrap();
-    /// 
+    ///
     /// assert_eq!(record_batch.num_columns(), 2);
     /// assert_eq!(record_batch.num_rows(), 3);
     /// ```
@@ -477,21 +550,22 @@ impl Table {
     }
 
     /// Get the Schema from the Table
-    /// 
+    ///
     /// # Example
-    /// 
+    ///
     /// ```
     /// use valu3_parquet::Table;
     /// use valu3::vec_value;
-    /// 
+    /// use valu3::prelude::*;
+    ///
     /// let mut table = Table::new();
     /// table.add("id", vec_value![1, 2, 3]);
     /// table.add("name", vec_value!["Alice", "Bob", "Charlie"]);
-    /// 
-    /// table.load_record_batch().unwrap();
-    /// 
+    ///
+    /// table.load().unwrap();
+    ///
     /// let schema = table.get_schema().unwrap();
-    /// 
+    ///
     /// assert_eq!(schema.fields().len(), 2);
     /// assert_eq!(schema.field(0).name(), "id");
     /// assert_eq!(schema.field(1).name(), "name");
@@ -507,6 +581,8 @@ impl Table {
 #[cfg(test)]
 mod tests {
     use super::*;
+    use bytes::Bytes;
+    use parquet::arrow::arrow_reader::ParquetRecordBatchReader;
     use valu3::vec_value;
 
     #[test]
@@ -550,7 +626,7 @@ mod tests {
         table.add("id", vec_value![1, 2, 3]);
         table.add("name", vec_value!["Alice", "Bob", "Charlie"]);
 
-        table.load_record_batch().unwrap();
+        table.load().unwrap();
 
         let file_path = "test_table_record_batch_parquet.parquet";
 
@@ -565,12 +641,25 @@ mod tests {
 
         assert_eq!(
             table.get_cols(),
-            &vec![
-                vec_value![1, 2, 3],
-                vec_value!["Alice", "Bob", "Charlie"]
-            ]
+            &vec![vec_value![1, 2, 3], vec_value!["Alice", "Bob", "Charlie"]]
         );
 
         std::fs::remove_file(file_path).unwrap();
+    }
+
+    #[test]
+    fn test_table_record_batch_parquet_buffer() {
+        let mut table = Table::new();
+        table.add("id", vec_value![1, 2, 3]);
+        table.add("name", vec_value!["Alice", "Bob", "Charlie"]);
+
+        table.load().unwrap();
+
+        let buffer = table.to_parquet_buffer().unwrap();
+
+        let mut reader = ParquetRecordBatchReader::try_new(Bytes::from(buffer), 1024).unwrap();
+        let read = reader.next().unwrap().unwrap();
+
+        assert_eq!(table.get_batch_record().unwrap(), &read);
     }
 }

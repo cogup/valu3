@@ -24,7 +24,7 @@ fn main() {
     table.add(Key::Age.into(), vec_value![25, 30, 35]);
     table.add(Key::IsStudent.into(), vec_value![true, false, true]);
 
-    table.load_record_batch().unwrap();
+    table.load().unwrap();
 
     table.to_parquet("example.parquet").unwrap();
 

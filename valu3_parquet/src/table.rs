@@ -272,7 +272,7 @@ impl Table {
     /// use valu3_parquet::Table;
     ///
     /// let mut table = Table::new();
-    /// table.load_record_batch().unwrap();
+    /// table.load().unwrap();
     /// assert!(table.get_batch_record().is_some());
     /// ```
     pub fn get_col(&self, index: usize) -> Option<&Vec<Value>> {
@@ -344,7 +344,7 @@ mod tests {
         table.add("active", vec_value![true, false, true]);
         table.add("amount", vec_value![100.0, 150.0, 200.0]);
 
-        table.load_record_batch().unwrap();
+        table.load().unwrap();
 
         let batch = table.get_batch_record().unwrap();
 
