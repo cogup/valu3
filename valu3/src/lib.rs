@@ -35,6 +35,9 @@ pub mod value;
 pub mod impls;
 pub mod to_value;
 
+#[cfg(feature = "parquet")]
+pub mod parquet;
+
 #[cfg(feature = "parser")]
 #[macro_use]
 extern crate pest_derive;

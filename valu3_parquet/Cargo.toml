@@ -1,6 +1,6 @@
 [package]
 name = "valu3-parquet"
-version = "0.4.3"
+version = "0.4.4"
 edition = "2021"
 license = "MIT OR Apache-2.0"
 readme = "crates-io.md"
@@ -18,3 +18,9 @@ valu3 = { path = "../valu3", version = "0"}
 parquet = "50.0.0"
 arrow = "50.0.0"
 prettytable = { version = "0.10.0", optional = true }
+
+[[example]]
+name = "parquet"
+path = "examples/parquet.rs"
+required-features = ["prettytable"]
+

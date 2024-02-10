@@ -1,6 +1,6 @@
+use crate::*;
 use std::collections::HashMap;
 use valu3::prelude::*;
-use crate::*;
 
 /// Represents a table with headers and columns of values.
 #[derive(Debug, Clone, Default)]
@@ -46,26 +46,26 @@ impl Table {
     }
 
     /// Returns the number of columns in the table.
-    /// 
+    ///
     /// # Examples
-    /// 
+    ///
     /// ```
     /// use valu3_parquet::Table;
-    /// 
+    ///
     /// let mut table = Table::new();
     /// assert_eq!(table.count_cols(), 0);
     /// ```
     pub fn add_col(&mut self, col: Vec<Value>) {
         self.cols.push(col);
     }
-    
+
     /// Adds a column to the table and associates it with the provided header.
-    /// 
+    ///
     /// # Examples
-    /// 
+    ///
     /// ```
     /// use valu3_parquet::Table;
-    /// 
+    ///
     /// let mut table = Table::new();
     /// table.add_col_to_header("id", vec_value![1, 2, 3]);
     /// ```
@@ -76,12 +76,12 @@ impl Table {
     }
 
     /// Adds a column to the table and associates it with the header at the specified index.
-    /// 
+    ///
     /// # Examples
-    /// 
+    ///
     /// ```
     /// use valu3_parquet::Table;
-    /// 
+    ///
     /// let mut table = Table::new();
     /// table.add_col_to_header_index(0, vec_value![1, 2, 3]);
     /// ```
@@ -95,12 +95,12 @@ impl Table {
     }
 
     /// Pushes a value into a specified column of the table.
-    /// 
+    ///
     /// # Examples
-    /// 
+    ///
     /// ```
     /// use valu3_parquet::Table;
-    /// 
+    ///
     /// let mut table = Table::new();
     /// table.push_item(0, 1.to_value());
     /// ```
@@ -109,12 +109,12 @@ impl Table {
     }
 
     /// Pushes a value into the column associated with the specified header.
-    /// 
+    ///
     /// # Examples
-    /// 
+    ///
     /// ```
     /// use valu3_parquet::Table;
-    /// 
+    ///
     /// let mut table = Table::new();
     /// table.push_item_in_header("id", 1.to_value());
     /// ```
@@ -130,12 +130,12 @@ impl Table {
     }
 
     /// Adds a header to the table.
-    /// 
+    ///
     /// # Examples
-    /// 
+    ///
     /// ```
     /// use valu3_parquet::Table;
-    /// 
+    ///
     /// let mut table = Table::new();
     /// table.add_header("id");
     /// ```
@@ -144,12 +144,12 @@ impl Table {
     }
 
     /// Adds a header to the table using a String.
-    /// 
+    ///
     /// # Examples
-    /// 
+    ///
     /// ```
     /// use valu3_parquet::Table;
-    /// 
+    ///
     /// let mut table = Table::new();
     /// table.add_header_string("id".to_string());
     /// ```
@@ -159,12 +159,12 @@ impl Table {
     }
 
     /// Changes the value at the specified row and column indices.
-    /// 
+    ///
     /// # Examples
-    /// 
+    ///
     /// ```
     /// use valu3_parquet::Table;
-    /// 
+    ///
     /// let mut table = Table::new();
     /// table.change_value(0, 0, 1.to_value());
     /// ```
@@ -173,12 +173,12 @@ impl Table {
     }
 
     /// Adds a column with the specified header and values.
-    /// 
+    ///
     /// # Examples
-    /// 
+    ///
     /// ```
     /// use valu3_parquet::Table;
-    /// 
+    ///
     /// let mut table = Table::new();
     /// table.add("id", vec_value![1, 2, 3]);
     /// ```
@@ -187,6 +187,7 @@ impl Table {
         self.add_col(value);
     }
 
+    /// Adds a column with the specified header and values.
     pub fn extend(&mut self, table: &Table) {
         for (index, header) in table.headers.iter().enumerate() {
             let col = table.get_col(index).unwrap().clone();
@@ -195,13 +196,34 @@ impl Table {
         }
     }
 
-    /// Retrieves the header at the specified index.
-    /// 
+    /// Loads a record batch into the table.
+    ///
     /// # Examples
-    /// 
+    ///
     /// ```
     /// use valu3_parquet::Table;
-    /// 
+    ///
+    /// let mut table = Table::new();
+    /// table.add("id", vec_value![1, 2, 3]);
+    ///
+    /// assert_eq!(table.get("id").unwrap(), &vec_value![1, 2, 3]);
+    /// ```
+    pub fn get(&self, header: &str) -> Option<&Vec<Value>> {
+        let index = self.headers.iter().position(|x| x == header);
+
+        match index {
+            Some(index) => self.get_col(index),
+            None => None,
+        }
+    }
+
+    /// Retrieves the header at the specified index.
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// use valu3_parquet::Table;
+    ///
     /// let mut table = Table::new();
     /// table.add_header("id");
     /// assert_eq!(table.get_header(0).unwrap(), "id");
@@ -211,12 +233,12 @@ impl Table {
     }
 
     /// Retrieves a reference to the table's headers.
-    /// 
+    ///
     /// # Examples
-    /// 
+    ///
     /// ```
     /// use valu3_parquet::Table;
-    /// 
+    ///
     /// let mut table = Table::new();
     /// table.add_header("id");
     /// assert_eq!(table.get_headers(), &vec!["id".to_string()]);
@@ -226,12 +248,14 @@ impl Table {
     }
 
     /// Retrieves a reference to the table's columns.
-    /// 
+    ///
     /// # Examples
-    /// 
+    ///
     /// ```
     /// use valu3_parquet::Table;
-    /// 
+    /// use valu3::prelude::*;
+    /// use valu3::vec_value;
+    ///
     /// let mut table = Table::new();
     /// table.add("id", vec_value![1, 2, 3]);
     /// assert_eq!(table.get_cols(), &vec![vec_value![1, 2, 3]]);
@@ -241,12 +265,12 @@ impl Table {
     }
 
     /// Retrieves the record batch associated with the table.
-    /// 
+    ///
     /// # Examples
-    /// 
+    ///
     /// ```
     /// use valu3_parquet::Table;
-    /// 
+    ///
     /// let mut table = Table::new();
     /// table.load_record_batch().unwrap();
     /// assert!(table.get_batch_record().is_some());
@@ -256,12 +280,14 @@ impl Table {
     }
 
     /// Retrieves the value at the specified row and column indices.
-    /// 
+    ///
     /// # Examples
-    /// 
+    ///
     /// ```
     /// use valu3_parquet::Table;
-    /// 
+    /// use valu3::prelude::*;
+    /// use valu3::vec_value;
+    ///
     /// let mut table = Table::new();
     /// table.add("id", vec_value![1, 2, 3]);
     /// assert_eq!(table.get_value(0, 0).unwrap(), &1.to_value());
@@ -271,12 +297,12 @@ impl Table {
     }
 
     /// Converts the table to a HashMap representation.
-    /// 
+    ///
     /// # Examples
-    /// 
+    ///
     /// ```
     /// use valu3_parquet::Table;
-    /// 
+    ///
     /// let mut table = Table::new();
     /// table.add("id", vec_value![1, 2, 3]);
     /// table.add("name", vec_value!["Alice", "Bob", "Charlie"]);
@@ -296,7 +322,6 @@ impl Table {
         map
     }
 }
-
 
 impl ToValueBehavior for Table {
     fn to_value(&self) -> Value {
@@ -371,8 +396,8 @@ mod tests {
             ("name".to_string(), vec_value!["Bob", "Carol", "Ted"]),
             ("active".to_string(), vec_value![true, false, true]),
             ("amount".to_string(), vec_value![100.0, 150.0, 200.0]),
-        ]).to_value();
-
+        ])
+        .to_value();
 
         assert_eq!(value, compare_map);
     }
