@@ -5,7 +5,8 @@ on:
     tags:
       - '*'
     paths:
-      - "valu3-parket/**"
+      - "valu3-parquet/**"
+      - ".github/workflows/cargo-valu3-parquet.yml"
 
 env:
   CARGO_REGISTRY_TOKEN: ${{ secrets.CARGO_REGISTRY_TOKEN }}
