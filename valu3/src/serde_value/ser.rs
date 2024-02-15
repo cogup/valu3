@@ -3,6 +3,7 @@ use crate::types::number::NumberType;
 use serde::ser::SerializeSeq;
 use serde::ser::{Error, Serialize, Serializer};
 
+
 impl Serialize for Value {
     fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
     where

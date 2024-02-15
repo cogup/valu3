@@ -15,3 +15,5 @@ pub use crate::impls::*;
 pub use std::ffi::CString;
 #[cfg(feature = "derive")]
 pub use valu3_derive::*;
+#[cfg(feature = "serde")]
+pub use crate::serde_value::*;

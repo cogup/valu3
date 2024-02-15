@@ -22,6 +22,13 @@ impl ValueKey {
             ValueKey::Number(n) => *n,
         }
     }
+
+    pub fn len(&self) -> usize {
+        match self {
+            ValueKey::String(s) => s.len(),
+            ValueKey::Number(n) => n.to_string().len(),
+        }
+    }
 }
 
 impl Display for ValueKey {

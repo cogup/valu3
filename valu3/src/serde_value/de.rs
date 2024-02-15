@@ -1,9 +1,8 @@
 use crate::prelude::*;
+use serde::de::{self, Deserialize, Visitor};
 use serde::Deserializer;
 use std::collections::HashMap;
 use std::fmt;
-use serde::de::{self, Deserialize, Visitor};
-
 
 impl<'de> Deserialize<'de> for Value {
     fn deserialize<D>(deserializer: D) -> Result<Value, D::Error>
@@ -156,8 +155,82 @@ impl<'de> Deserialize<'de> for Value {
             {
                 Ok(Value::Null)
             }
+
+            fn visit_unit<E>(self) -> Result<Self::Value, E>
+            where
+                E: de::Error,
+            {
+                Ok(Value::Null)
+            }
+
+            fn visit_newtype_struct<D>(self, deserializer: D) -> Result<Self::Value, D::Error>
+            where
+                D: Deserializer<'de>,
+            {
+                Deserialize::deserialize(deserializer)
+            }
+
+            fn visit_char<E>(self, v: char) -> Result<Self::Value, E>
+            where
+                E: de::Error,
+            {
+                self.visit_str(v.encode_utf8(&mut [0u8; 4]))
+            }
+
+            fn visit_borrowed_str<E>(self, v: &'de str) -> Result<Self::Value, E>
+            where
+                E: de::Error,
+            {
+                self.visit_str(v)
+            }
+
+            fn visit_bytes<E>(self, v: &[u8]) -> Result<Self::Value, E>
+            where
+                E: de::Error,
+            {
+                Err(de::Error::invalid_type(de::Unexpected::Bytes(v), &self))
+            }
+
+            fn visit_borrowed_bytes<E>(self, v: &'de [u8]) -> Result<Self::Value, E>
+            where
+                E: de::Error,
+            {
+                self.visit_bytes(v)
+            }
+
+            fn visit_byte_buf<E>(self, v: Vec<u8>) -> Result<Self::Value, E>
+            where
+                E: de::Error,
+            {
+                self.visit_bytes(&v)
+            }
+
+            fn visit_some<D>(self, deserializer: D) -> Result<Self::Value, D::Error>
+            where
+                D: Deserializer<'de>,
+            {
+                let _ = deserializer;
+                Err(de::Error::invalid_type(de::Unexpected::Option, &self))
+            }
+
+            fn visit_enum<A>(self, data: A) -> Result<Self::Value, A::Error>
+            where
+                A: de::EnumAccess<'de>,
+            {
+                let _ = data;
+                Err(de::Error::invalid_type(de::Unexpected::Enum, &self))
+            }
+            
         }
 
         deserializer.deserialize_any(ValueVisitor)
+    }
+
+    fn deserialize_in_place<D>(deserializer: D, place: &mut Self) -> Result<(), D::Error>
+    where
+        D: Deserializer<'de>,
+    {
+        *place = Deserialize::deserialize(deserializer)?;
+        Ok(())
     }
 }
