@@ -603,7 +603,33 @@ impl Display for Number {
     /// println!("{}", num); // Output: 42.0
     /// ```
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        write!(f, "{}", 2)
+        if self.is_i8() {
+            write!(f, "{}", self.get_i8_unsafe())
+        } else if self.is_i16() {
+            write!(f, "{}", self.get_i16_unsafe())
+        } else if self.is_i32() {
+            write!(f, "{}", self.get_i32_unsafe())
+        } else if self.is_i64() {
+            write!(f, "{}", self.get_i64_unsafe())
+        } else if self.is_i128() {
+            write!(f, "{}", self.get_i128_unsafe())
+        } else if self.is_u8() {
+            write!(f, "{}", self.get_u8_unsafe())
+        } else if self.is_u16() {
+            write!(f, "{}", self.get_u16_unsafe())
+        } else if self.is_u32() {
+            write!(f, "{}", self.get_u32_unsafe())
+        } else if self.is_u64() {
+            write!(f, "{}", self.get_u64_unsafe())
+        } else if self.is_u128() {
+            write!(f, "{}", self.get_u128_unsafe())
+        } else if self.is_f32() {
+            write!(f, "{}", self.get_f32_unsafe())
+        } else if self.is_f64() {
+            write!(f, "{}", self.get_f64_unsafe())
+        } else {
+            write!(f, "0")
+        }
     }
 }
 
