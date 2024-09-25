@@ -1,4 +1,4 @@
-name: Cargo Build & Test
+name: Auto test
 
 on:
   pull_request:
