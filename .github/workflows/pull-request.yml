@@ -1,10 +1,7 @@
 name: Auto test
 
 on:
-  pull_request:
-
-env: 
-  CARGO_TERM_COLOR: always
+  create
 
 jobs:
   build_and_test:
