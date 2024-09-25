@@ -1,9 +1,6 @@
 name: Tag Release
 
 on:
-  push:
-    branches:
-      - main
   pull_request:
     branches:
       - main
@@ -24,8 +21,6 @@ jobs:
 
       - name: Create tag
         run: |
-          git config user.name "GitHub Action"
-          git config user.email "action@github.com"
           git tag "$VERSION"
           git push origin "$VERSION"
         env:
