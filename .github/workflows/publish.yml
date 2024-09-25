@@ -45,15 +45,7 @@ jobs:
           git tag "$VERSION"
           git push origin "$VERSION"
         env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          
-  valu3_publish:
-    needs: tag
-    name: Valu3 - latest
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
-      - run: cargo publish --verbose -p valu3
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}            
   
   valu3_derive_publish:
     needs: tag
@@ -62,3 +54,11 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - run: cargo publish --verbose -p valu3-derive
+
+  valu3_publish:
+    needs: valu3_derive_publish
+    name: Valu3 - latest
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - run: cargo publish --verbose -p valu3
