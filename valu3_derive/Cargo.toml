@@ -1,6 +1,6 @@
 [package]
 name = "valu3-derive"
-version = "0.5.2"
+version = "0.5.3"
 edition = "2021"
 license = "MIT OR Apache-2.0"
 readme = "crates-io.md"
@@ -13,9 +13,9 @@ documentation = "https://docs.rs/valu3-derive"
 
 
 [dependencies]
-syn = { version = "2.0.48", features = ["full"] }
-quote = "1.0.35"
-proc-macro2 = "1.0.78"
+syn = { version = "2.0.77", features = ["full"] }
+quote = "1.0.37"
+proc-macro2 = "1.0.86"
 
 [lib]
 proc-macro = true
