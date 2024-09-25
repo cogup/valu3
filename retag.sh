@@ -9,7 +9,7 @@ fi
 last_tag=$1
 new_tag=$2
 
-files=("valu3/Cargo.toml" "valu3_derive/Cargo.toml" "valu3/README.md" "valu3_derive/README.md" "README.md")
+files=("valu3/Cargo.toml" "valu3_derive/Cargo.toml" "valu3/README.md" "valu3_derive/README.md" "README.md" "VERSION.txt")
 
 # Loop através dos files e realiza o replace
 for file in "${files[@]}"; do
