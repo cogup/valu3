@@ -8,8 +8,8 @@ Welcome to **Valu3** - the ultimate, flexible, and powerful library for manipula
 ![MSRV](https://img.shields.io/badge/rustc-1.59+-ab6000.svg)
 ![MIT or Apache 2.0 licensed](https://img.shields.io/crates/l/actix-web.svg)
 [![Dependency Status](https://deps.rs/crate/valu3/0.5.9/status.svg)](https://deps.rs/crate/valu3/0.5.9)
-![Main test](https://github.com/purp-lang/valu3/actions/workflows/main-test.yml/badge.svg)
-[![codecov](https://codecov.io/gh/purp-lang/valu3/branch/master/graph/badge.svg)](https://codecov.io/gh/purp-lang/valu3)
+![Main test](https://github.com/cogup/valu3/actions/workflows/main-test.yml/badge.svg)
+[![codecov](https://codecov.io/gh/cogup/valu3/branch/master/graph/badge.svg)](https://codecov.io/gh/cogup/valu3)
 ![downloads](https://img.shields.io/crates/d/valu3.svg)
 
 ## 🌟 Key Features
@@ -137,15 +137,13 @@ fn main(){
 ```
 
 ## Contributing
-If you find a bug or have a suggestion for a new feature, please open an issue on the [GitHub repository](https://github.com/purp-lang/valu3/issues).
+If you find a bug or have a suggestion for a new feature, please open an issue on the [GitHub repository](https://github.com/cogup/valu3/issues).
 
 If you would like to contribute to the project, please feel free to submit a pull request. Before submitting a pull request, please make sure that your code adheres to the project's style guidelines and passes all tests.
 
 ## Upcoming Features: Stay in Sync with the Future of Valu3 🌐
 
-We're constantly working to improve and expand the capabilities of Valu3, making it even more powerful and versatile. Stay updated on the upcoming features and enhancements by visiting our project board on GitHub:
-
-🔗 [Purp Project Board on GitHub](https://github.com/orgs/purp-lang/projects/1/settings)
+We're constantly working to improve and expand the capabilities of Valu3, making it even more powerful and versatile. 
 
 By keeping track of the project's progress, you can stay informed about new features in development and planned improvements. This will allow you to make the most of Valu3 in your Rust projects and prepare for future updates.
 
@@ -155,4 +153,4 @@ Join us in the ongoing journey to refine and expand Valu3! 🚀
 
 
 ## License
-This project is licensed under the Apache 2.0 or MIT License. See the [LICENSE-APACHE](https://github.com/purp-lang/valu3/blob/main/LICENSE-APACHE) or [LICENSE-MIT](https://github.com/purp-lang/valu3/blob/main/LICENSE-MIT) file for more information.
+This project is licensed under the Apache 2.0 or MIT License. See the [LICENSE-APACHE](https://github.com/cogup/valu3/blob/main/LICENSE-APACHE) or [LICENSE-MIT](https://github.com/cogup/valu3/blob/main/LICENSE-MIT) file for more information.
