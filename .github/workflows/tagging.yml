@@ -1,0 +1,32 @@
+name: Tag Release
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    branches:
+      - main
+    types: [closed]
+
+jobs:
+  tag:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v2
+
+      - name: Read version from VERSION.txt
+        id: get_version
+        run: |
+          version=$(cat VERSION.txt)
+          echo "VERSION=${version}" >> $GITHUB_ENV
+
+      - name: Create tag
+        run: |
+          git config user.name "GitHub Action"
+          git config user.email "action@github.com"
+          git tag "$VERSION"
+          git push origin "$VERSION"
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
