@@ -1,7 +1,9 @@
 name: Auto test
 
 on:
-  create
+  pull_request:
+    branches:
+      - main
 
 jobs:
   build_and_test:

@@ -777,6 +777,21 @@ impl From<usize> for Number {
     }
 }
 
+impl From<isize> for Number {
+    fn from(i: isize) -> Self {
+        match i {
+            i if i <= i8::MAX as isize => Number::from(i as i8),
+            i if i <= i16::MAX as isize => Number::from(i as i16),
+            i if i <= i32::MAX as isize => Number::from(i as i32),
+            i if i <= i64::MAX as isize => Number::from(i as i64),
+            i if i <= i128::MAX as isize => Number::from(i as i128),
+            i if i <= f32::MAX as isize => Number::from(i as f32),
+            i if i <= f64::MAX as isize => Number::from(i as f64),
+            _ => Number::from(i as f64),
+        }
+    }
+}
+
 /// Converts a `&str` value to a `Number` if it can be parsed as a valid number.
 ///
 /// # Arguments
@@ -1091,5 +1106,17 @@ mod tests {
 
         number.clean().set_f64(-10_000_000_000.0);
         assert_eq!(number.number_type(), NumberType::F64);
+    }
+
+    #[test]
+    fn test_from_usize() {
+        let number = Number::from(42usize);
+        assert_eq!(number.get_u8(), Some(42));
+    }
+
+    #[test]
+    fn test_from_isize() {
+        let number = Number::from(-42isize);
+        assert_eq!(number.get_i8(), Some(-42));
     }
 }

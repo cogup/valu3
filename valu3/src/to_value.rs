@@ -205,6 +205,12 @@ impl ToValueBehavior for usize {
     }
 }
 
+impl ToValueBehavior for isize {
+    fn to_value(&self) -> Value {
+        Value::Number(Number::from(*self))
+    }
+}
+
 /// Set to_value all items in a vector
 /// # Example
 /// ```
@@ -267,6 +273,12 @@ mod test {
     #[test]
     fn test_from_usize() {
         let number = 1 as usize;
+        assert_eq!(number.to_value(), Value::Number(Number::from(number)));
+    }
+
+    #[test]
+    fn test_from_isize() {
+        let number = 1 as isize;
         assert_eq!(number.to_value(), Value::Number(Number::from(number)));
     }
 }
