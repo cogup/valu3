@@ -54,3 +54,7 @@ impl PrimitiveType for i128 {}
 impl PrimitiveType for f32 {}
 
 impl PrimitiveType for f64 {}
+
+impl PrimitiveType for usize {}
+
+impl PrimitiveType for isize {}
