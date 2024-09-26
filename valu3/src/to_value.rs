@@ -199,6 +199,11 @@ impl ToValueBehavior for f64 {
         Value::Number(Number::from(*self))
     }
 }
+impl ToValueBehavior for usize {
+    fn to_value(&self) -> Value {
+        Value::Number(Number::from(*self))
+    }
+}
 
 /// Set to_value all items in a vector
 /// # Example
@@ -257,5 +262,11 @@ mod test {
             vec_value![1, 2, vec![1, 2, 3]],
             vec![Value::from(1), Value::from(2), Value::from(vec![1, 2, 3])]
         );
+    }
+
+    #[test]
+    fn test_from_usize() {
+        let number = 1 as usize;
+        assert_eq!(number.to_value(), Value::Number(Number::from(number)));
     }
 }
